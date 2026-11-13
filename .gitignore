@@ -1,0 +1,34 @@
+# OS metadata & thumbnail caches
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Editor / IDE directories
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Logs & temporary files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+.cache/
+
+# Environment & local dependencies (if added later)
+.env
+.env.*
+node_modules/

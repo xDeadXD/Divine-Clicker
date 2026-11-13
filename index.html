@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Divine Clicker</title>
+  <link rel="icon" type="image/jpeg" href="./assets/icons/divine_orb.jpg?v=6" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css?v=23" />
+</head>
+<body class="assets-loading">
+  <div id="app-container">
+    <!-- TOP HUD BAR -->
+    <header id="top-hud">
+      <!-- Top-Left: Divine Orb + Divine Clicker Text, Mode Tabs, Activate -->
+      <div id="hud-top-left" class="hud-top-left">
+        <div class="brand-wrap">
+          <img id="img-brand-divine-orb" class="ui-slice brand-orb-slice" alt="" />
+          <img id="img-brand-emblem" class="ui-slice brand-emblem-slice" alt="Divine Clicker" />
+        </div>
+
+        <div class="mode-tabs-wrap" role="tablist" aria-label="Map Mode">
+          <button id="tab-timed" class="ui-tab-btn active" type="button" role="tab" aria-selected="true" title="T16 Delirium (60s)">
+            <img id="img-tab-timed" class="ui-slice" alt="T16 Delirium (60s)" />
+          </button>
+          <button id="tab-endless" class="ui-tab-btn" type="button" role="tab" aria-selected="false" title="Endless Mapping">
+            <img id="img-tab-endless" class="ui-slice" alt="Endless" />
+          </button>
+        </div>
+
+        <button id="btn-start-map" class="ui-activate-btn" type="button" title="Activate Map Device">
+          <img id="img-btn-activate" class="ui-slice" alt="Activate" />
+        </button>
+      </div>
+
+      <!-- Top-Center: Flush Winged Plaque with Timer Nameplate & 3 Integrity Gem Sockets -->
+      <div id="hud-top-center" class="hud-top-center">
+        <div id="plaque-wrap" class="plaque-wrap">
+          <img id="img-plaque" class="ui-slice plaque-img" alt="Map Plaque" />
+          <div id="plaque-nameplate" class="plaque-nameplate">
+            <span id="hud-plaque-timer">T16 DELIRIUM 60.0S</span>
+          </div>
+          <div id="plaque-integrity-label" class="plaque-integrity-label">
+            INTEGRITY <span id="hud-integrity-count">3/3</span>
+          </div>
+          <div id="plaque-sockets" class="plaque-sockets" aria-label="Integrity Gems">
+            <div class="socket-slot" id="socket-1"><img class="socket-gem-img" alt="" /></div>
+            <div class="socket-slot" id="socket-2"><img class="socket-gem-img" alt="" /></div>
+            <div class="socket-slot" id="socket-3"><img class="socket-gem-img" alt="" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top-Right: Segmented Stat Bar + Audio/Breakdown/Help Controls -->
+      <div id="hud-top-right" class="hud-top-right">
+        <div id="stat-bar-wrap" class="stat-bar-wrap">
+          <img id="img-stat-bar" class="ui-slice stat-bar-img" alt="Statistics" />
+          <div id="stat-values-overlay" class="stat-values-overlay">
+            <div class="stat-cell" id="stat-cell-score">
+              <span id="hud-score" class="stat-num stat-num-gold">0</span>
+            </div>
+            <div class="stat-cell" id="stat-cell-best">
+              <span id="hud-highscore" class="stat-num stat-num-gold">0</span>
+            </div>
+            <div class="stat-cell" id="stat-cell-streak">
+              <span id="hud-streak" class="stat-num stat-num-streak">1.0x</span>
+            </div>
+            <div class="stat-cell" id="stat-cell-accuracy">
+              <span id="hud-accuracy" class="stat-num">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="utility-controls">
+          <button id="btn-mute" class="ui-icon-btn ui-speaker-btn" type="button" title="Toggle Audio Mute (M)">
+            <img id="img-icon-speaker" class="ui-slice" alt="Mute Audio" />
+            <span id="mute-slash" class="mute-slash hidden" aria-hidden="true"></span>
+          </button>
+          <input id="slider-volume" class="poe-volume-slider" type="range" min="0" max="100" value="80" title="Master Volume" aria-label="Master Volume" />
+          <button id="btn-summary" class="ui-icon-btn" type="button" title="View Post-Map Loot Breakdown">
+            <img id="img-icon-list" class="ui-slice" alt="Loot Breakdown" />
+          </button>
+          <button id="btn-help" class="ui-icon-btn" type="button" title="How to Play &amp; Shortcuts">
+            <img id="img-icon-help" class="ui-slice" alt="Help" />
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- PLAYFIELD: ASTROLABE + 60FPS CANVAS + DOM LOOT OVERLAY -->
+    <main id="playfield">
+      <!-- Central Golden Runic Astrolabe (mix-blend-mode: screen) -->
+      <div id="astrolabe-stage" class="astrolabe-stage" role="button" tabindex="0" aria-label="Map Device Astrolabe — Click to activate or spawn currency drops">
+        <img id="img-astrolabe-outer" class="astrolabe-layer astrolabe-outer" alt="" draggable="false" />
+        <img id="img-astrolabe-mid" class="astrolabe-layer astrolabe-mid" alt="" draggable="false" />
+        <img id="img-astrolabe-core" class="astrolabe-layer astrolabe-core" alt="" draggable="false" />
+      </div>
+
+      <canvas id="vfx-canvas"></canvas>
+      <div id="loot-layer"></div>
+      <div id="damage-flash" aria-hidden="true"></div>
+    </main>
+
+    <!-- BOTTOM CENTER: PARCHMENT SCROLL BANNER + RIVETED ACTION DOCK -->
+    <div id="bottom-center-stack" class="bottom-center-stack">
+      <div id="scroll-banner-wrap" class="scroll-banner-wrap">
+        <img id="img-scroll-banner" class="ui-slice scroll-banner-img" alt="" />
+        <div id="live-feed" class="scroll-feed-text">Map Device idle. Click ACTIVATE or the Astrolabe to begin.</div>
+      </div>
+
+      <div id="bottom-dock-wrap" class="bottom-dock-wrap">
+        <img id="img-bottom-dock" class="ui-slice bottom-dock-img" alt="Action Dock" />
+        <!-- Mechanic Socket Icons overlaid dynamically into Breach & Abyss frames -->
+        <div id="dock-breach-slot" class="dock-mechanic-slot dock-breach-slot" aria-hidden="true">
+          <img id="img-dock-breach" class="ui-slice dock-mechanic-icon" alt="" />
+        </div>
+        <div id="dock-abyss-slot" class="dock-mechanic-slot dock-abyss-slot" aria-hidden="true">
+          <img id="img-dock-abyss" class="ui-slice dock-mechanic-icon" alt="" />
+        </div>
+        <!-- BREACH, ABYSS, and PORTAL remain non-interactive visual indicators; ONLY LABELS: ON is interactive -->
+        <button id="btn-toggle-labels" class="dock-labels-hitbox" type="button" title="Toggle Ground Labels (Z)" aria-label="Toggle Ground Loot Labels">
+          <span id="dock-labels-off-badge" class="dock-labels-off-badge hidden">
+            <span>LABELS: OFF</span>
+            <span class="dock-off-dot"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTTOM CORNERS -->
+    <div id="corner-left" class="corner-left">
+      <img id="img-gauntlet" class="ui-slice gauntlet-img" alt="" />
+      <span class="corner-loot-label">Ground Loot: <strong id="hud-active-count">0</strong></span>
+    </div>
+
+    <div id="corner-right" class="corner-right">
+      <span class="corner-tip-text">Tip: Don't click Scrolls / Transmutes</span>
+    </div>
+
+    <!-- POST-MAP LOOT BREAKDOWN MODAL -->
+    <div id="summary-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div id="summary-modal-frame" class="summary-modal-frame">
+        <canvas id="modal-frame-canvas" class="modal-frame-canvas" aria-hidden="true"></canvas>
+        <h2 id="modal-title" class="sr-only">Post-Map Loot Breakdown</h2>
+
+        <button id="btn-close-modal" class="modal-close-hitbox" type="button" aria-label="Close Modal" title="Close Breakdown (Esc)">
+          <img id="img-modal-close" class="ui-slice modal-close-sprite" alt="Close" />
+        </button>
+
+        <div id="summary-modal-content" class="summary-modal-content">
+          <div id="modal-subtitle-slot" class="modal-subtitle-slot">
+            <p id="modal-subtitle" class="modal-subtitle">T16 Delirium Map Complete</p>
+          </div>
+
+          <div id="modal-stat-bar-wrap" class="modal-stat-bar-wrap">
+            <img id="img-modal-stat-bar" class="ui-slice modal-stat-bar-img" alt="" />
+            <div id="modal-kpi-final" class="modal-stat-cell">
+              <span id="modal-score" class="modal-stat-val val-light-grey">0</span>
+            </div>
+            <div id="modal-kpi-best" class="modal-stat-cell">
+              <span id="modal-highscore" class="modal-stat-val val-gold">0</span>
+            </div>
+            <div id="modal-kpi-streak" class="modal-stat-cell">
+              <span id="modal-max-streak" class="modal-stat-val val-light-grey">1.0x</span>
+            </div>
+            <div id="modal-kpi-integrity" class="modal-stat-cell">
+              <span id="modal-strikes" class="modal-stat-val val-crimson">3 / 3</span>
+            </div>
+            <div id="modal-kpi-accuracy" class="modal-stat-cell">
+              <span id="modal-accuracy" class="modal-stat-val val-grey-white">100%</span>
+            </div>
+          </div>
+
+          <div id="modal-ledger-wrap" class="modal-ledger-wrap">
+            <div id="ledger-header-wrap" class="ledger-header-wrap">
+              <img id="img-ledger-header" class="ui-slice ledger-header-img" alt="" />
+            </div>
+
+            <div id="ledger-rows-scroll" class="ledger-rows-scroll">
+              <div id="breakdown-tbody" class="ledger-rows-list" role="table" aria-label="Currency Loot Breakdown">
+                <!-- Populated dynamically by game.js -->
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer-bar">
+            <button id="btn-modal-replay" class="modal-action-img-btn" type="button" aria-label="Run Another Map">
+              <img id="img-btn-replay" class="ui-slice modal-action-img" alt="Run Another Map" />
+            </button>
+            <button id="btn-modal-dismiss" class="modal-action-img-btn" type="button" aria-label="Close Breakdown">
+              <img id="img-btn-dismiss" class="ui-slice modal-action-img" alt="Close Breakdown" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HELP / RULES MODAL -->
+    <div id="help-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+      <div class="modal-dialog poe-modal-panel help-dialog">
+        <div class="modal-header">
+          <div>
+            <h2 id="help-modal-title">Atlas Map Device Guide</h2>
+            <p class="modal-subtitle">Rules, Currency Tiers &amp; Shortcuts</p>
+          </div>
+          <button id="btn-close-help" class="modal-close-btn" type="button" aria-label="Close Help">&times;</button>
+        </div>
+
+        <div class="help-body">
+          <div class="help-section">
+            <h3>Core Objective</h3>
+            <p>
+              Click <strong>ACTIVATE</strong> (or click the central <strong>Astrolabe</strong>) to open a <strong>60s T16 Delirium Map</strong> or <strong>Endless</strong> run. Rapidly click high-tier currency labels before they despawn (<strong>1.4s–1.8s</strong>) to build your streak multiplier up to <strong>5.0x</strong>.
+            </p>
+          </div>
+
+          <div class="help-section">
+            <h3>Integrity &amp; Clutter Hazards</h3>
+            <p>
+              You begin with <strong>3/3 Integrity</strong> crimson gems. Clicking minus-value clutter (<em>Scroll of Wisdom</em>, <em>Orb of Transmutation</em>, <em>Orb of Augmentation</em>, <em>Armourer's Scrap</em>, <em>Regal Shard</em>) deducts points, resets your streak to <strong>1.0x</strong>, and shatters one Integrity gem. Losing all 3 gems ends the map immediately.
+            </p>
+          </div>
+
+          <div class="help-section">
+            <h3>Breach, Abyss &amp; Controls</h3>
+            <ul>
+              <li><strong>Central Astrolabe:</strong> Click during a map to pulse the compass and burst bonus currency drops around the Atlas.</li>
+              <li><strong>Breach &amp; Abyss Encounters:</strong> Click glowing purple Breach or green Abyss icons on the map floor for high-tier loot explosions.</li>
+              <li><strong><kbd>Z</kbd> or Dock Switch:</strong> Toggle ground loot label visibility (<strong>LABELS: ON</strong> / <strong>OFF</strong>).</li>
+              <li><strong><kbd>SPACE</kbd>:</strong> Pop an immediate Breach/Abyss pack during a run.</li>
+              <li><strong><kbd>M</kbd>:</strong> Mute / unmute drop audio (S-Tier and Below S-Tier custom drop sounds).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-help-dismiss" class="poe-modal-btn poe-modal-btn-primary" type="button">
+            Return to Map
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./game.js?v=23"></script>
+</body>
+</html>
