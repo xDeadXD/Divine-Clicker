@@ -118,7 +118,7 @@
       beam: 'gold-tall',
       color: '#ff9900'
     },
-    // Paired S-Tier Flagship (1.3% total -> 0.65% each)
+    // Paired S-Tier Flagship (1.3% total -> 1.05% each)
     {
       id: 'divine_orb',
       name: 'Divine Orb',
