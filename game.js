@@ -29,7 +29,7 @@
       tier: 'F',
       cssClass: 'tier-f',
       points: -10,
-      weight: 20.0,
+      weight: 20.2,
       beam: null,
       color: '#5b8dd9'
     },
@@ -125,7 +125,7 @@
       tier: 'S',
       cssClass: 'tier-s',
       points: 500,
-      weight: 0.65,
+      weight: 0.85,
       beam: 'divine',
       color: '#ff2222'
     },
@@ -135,7 +135,7 @@
       tier: 'S',
       cssClass: 'tier-s',
       points: 500,
-      weight: 0.65,
+      weight: 0.85,
       beam: 'divine',
       color: '#ff3838'
     },
@@ -146,7 +146,7 @@
       tier: 'S',
       cssClass: 'tier-s',
       points: 900,
-      weight: 0.45,
+      weight: 0.25,
       beam: 'divine',
       color: '#ff1111'
     },
@@ -156,29 +156,29 @@
       tier: 'S',
       cssClass: 'tier-s',
       points: 900,
-      weight: 0.45,
+      weight: 0.25,
       beam: 'divine',
       color: '#ff1111'
     },
-    // S+ Tier Jackpot (0.3%)
+    // S+ Tier Jackpot (0.03%)
     {
       id: 'hinekoras_lock',
       name: "Hinekora's Lock",
       tier: 'S+',
       cssClass: 'tier-sp',
       points: 1800,
-      weight: 0.3,
+      weight: 0.03,
       beam: 'mythic',
       color: '#ff1e1e'
     },
-    // S++ Tier Mythic Jackpot (0.1%)
+    // S++ Tier Mythic Jackpot (0.01%)
     {
       id: 'mirror_kalandra',
       name: 'Mirror of Kalandra',
       tier: 'S++',
       cssClass: 'tier-spp',
       points: 4000,
-      weight: 0.1,
+      weight: 0.01,
       beam: 'mythic',
       color: '#ff2222'
     }
