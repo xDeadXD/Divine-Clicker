@@ -199,7 +199,7 @@
   const mechanicIconCache = new Map();
 
   function initAssetHotSwap() {
-    // Load the user-provided S-tier and below-S-tier drop sounds
+    // Load the S-tier and below-S-tier drop sounds
     const sTierAudio = new Audio('./assets/sounds/s_tier.mp3?v=4');
     sTierAudio.preload = 'auto';
     customAudioCache.set('s_tier', sTierAudio);
@@ -208,7 +208,7 @@
     belowSTierAudio.preload = 'auto';
     customAudioCache.set('below_s_tier', belowSTierAudio);
 
-    // Load user-provided Breach & Abyss icons
+    // Load Breach & Abyss icons
     const breachImg = new Image();
     breachImg.src = './assets/icons/breach.webp?v=4';
     mechanicIconCache.set('breach', breachImg);
@@ -235,7 +235,7 @@
       this.lastBelowSDropTime = 0;
     }
 
-    // Plays user's custom ./assets/sounds/s_tier.mp3 when S-Tier or higher (S / S+) drops
+    // Plays custom ./assets/sounds/s_tier.mp3 when S-Tier or higher (S / S+) drops
     playSTierDrop() {
       if (this.muted || this.volume <= 0) return;
       if (customAudioCache.has('s_tier')) {
@@ -247,7 +247,7 @@
       }
     }
 
-    // Plays user's custom ./assets/sounds/below_s_tier.mp3 when below S-Tier currency drops
+    // Plays custom ./assets/sounds/below_s_tier.mp3 when below S-Tier currency drops
     playBelowSTierDrop() {
       if (this.muted || this.volume <= 0) return;
       const now = performance.now();
