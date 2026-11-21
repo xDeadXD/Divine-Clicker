@@ -32,3 +32,4 @@ yarn-error.log*
 .env
 .env.*
 node_modules/
+_site/

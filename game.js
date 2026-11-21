@@ -250,21 +250,42 @@
   // 2. AUDIO & MECHANIC ICON LOADER (S-S++, A+, A-B custom MP3s, breach.webp, abyss.webp)
   // ---------------------------------------------------------------------------
   const customAudioCache = new Map();
+  const customAudioRawBuffers = new Map();
+  const customAudioDecodedBuffers = new Map();
   const mechanicIconCache = new Map();
   const currencyCanvasCache = new Map();
 
+  function preloadCustomSound(key, src) {
+    const clip = new Audio(src);
+    clip.preload = 'auto';
+    customAudioCache.set(key, clip);
+
+    // Pre-fetch raw bytes so Web Audio can decode instant zero-latency buffers once unlocked
+    if (typeof fetch === 'function') {
+      fetch(src)
+        .then((res) => (res.ok ? res.arrayBuffer() : null))
+        .then((buf) => {
+          if (buf) {
+            customAudioRawBuffers.set(key, buf);
+            if (typeof audio !== 'undefined' && audio && audio.ctx) {
+              audio.decodeCachedKey(key);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
   function initAssetHotSwap() {
-    // Load the 3 tier-specific drop sounds uploaded by user (all played at 100% volume)
+    // Load the 3 tier-specific drop sounds from relative ./assets/sounds/ paths (works on GitHub Pages & local dev)
     const tierSoundPaths = {
-      s_tier: '/assets/aistudio/S-S___57e3b2ee.mp3',
-      a_plus_tier: '/assets/aistudio/A__b835de96.mp3',
-      a_b_tier: '/assets/aistudio/A-B_7c0c8a02.mp3'
+      s_tier: './assets/sounds/s_tier_drop.mp3',
+      a_plus_tier: './assets/sounds/a_plus_tier_drop.mp3',
+      a_b_tier: './assets/sounds/a_b_tier_drop.mp3'
     };
 
     Object.entries(tierSoundPaths).forEach(([key, src]) => {
-      const clip = new Audio(src);
-      clip.preload = 'auto';
-      customAudioCache.set(key, clip);
+      preloadCustomSound(key, src);
     });
 
     // Load official PoE2DB Breach & Abyss Atlas icons
@@ -279,9 +300,7 @@
     if (window.POE2_ASSET_MANIFEST && typeof window.POE2_ASSET_MANIFEST === 'object') {
       const { sounds = {} } = window.POE2_ASSET_MANIFEST;
       Object.entries(sounds).forEach(([key, src]) => {
-        const audio = new Audio(src);
-        audio.preload = 'auto';
-        customAudioCache.set(key, audio);
+        preloadCustomSound(key, src);
       });
     }
   }
@@ -289,18 +308,91 @@
   class FilterBladeAudio {
     constructor() {
       this.ctx = null;
+      this.decodingKeys = new Set();
       this.muted = false;
       this.volume = 0.8;
       this.lastAPlusDropTime = 0;
       this.lastABDropTime = 0;
+
+      const unlockHandler = () => {
+        this.unlock();
+      };
+      window.addEventListener('pointerdown', unlockHandler, { passive: true });
+      window.addEventListener('keydown', unlockHandler, { passive: true });
+    }
+
+    ensureContext() {
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          try {
+            this.ctx = new AudioCtx();
+          } catch (_) {
+            this.ctx = null;
+          }
+        }
+      }
+      return this.ctx;
+    }
+
+    decodeCachedKey(key) {
+      if (!this.ctx || customAudioDecodedBuffers.has(key) || this.decodingKeys.has(key)) return;
+      const raw = customAudioRawBuffers.get(key);
+      if (!raw) return;
+      this.decodingKeys.add(key);
+      // Slice a copy so decodeAudioData detaching the ArrayBuffer doesn't wipe the cached source
+      this.ctx
+        .decodeAudioData(raw.slice(0))
+        .then((decoded) => {
+          customAudioDecodedBuffers.set(key, decoded);
+        })
+        .catch(() => {})
+        .finally(() => {
+          this.decodingKeys.delete(key);
+        });
+    }
+
+    unlock() {
+      const ctx = this.ensureContext();
+      if (!ctx) return;
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      customAudioRawBuffers.forEach((_buf, key) => {
+        this.decodeCachedKey(key);
+      });
     }
 
     playClipAtFullVolume(key) {
       if (this.muted || this.volume <= 0) return false;
+      const gainLevel = Math.min(1, Math.max(0, this.volume));
+
+      // Prefer zero-latency Web Audio buffer playback when unlocked & decoded (immune to CDN cloneNode stalls)
+      const ctx = this.ensureContext();
+      if (ctx && ctx.state === 'running') {
+        const decoded = customAudioDecodedBuffers.get(key);
+        if (decoded) {
+          try {
+            const src = ctx.createBufferSource();
+            const gain = ctx.createGain();
+            src.buffer = decoded;
+            gain.gain.value = gainLevel;
+            src.connect(gain);
+            gain.connect(ctx.destination);
+            src.start(0);
+            return true;
+          } catch (_) {
+            // Fall through to HTMLAudio fallback
+          }
+        } else {
+          this.decodeCachedKey(key);
+        }
+      }
+
       if (!customAudioCache.has(key)) return false;
       try {
         const clip = customAudioCache.get(key).cloneNode();
-        clip.volume = Math.min(1, this.volume);
+        clip.volume = gainLevel;
         clip.play().catch(() => {});
         return true;
       } catch (_) {

@@ -67,12 +67,13 @@ test('static server serves index, scripts, styles, and assets while blocking ser
     }
 
     for (const audioPath of [
-      '/assets/aistudio/S-S___57e3b2ee.mp3',
-      '/assets/aistudio/A__b835de96.mp3',
-      '/assets/aistudio/A-B_7c0c8a02.mp3'
+      '/assets/sounds/s_tier_drop.mp3',
+      '/assets/sounds/a_plus_tier_drop.mp3',
+      '/assets/sounds/a_b_tier_drop.mp3'
     ]) {
       const audioRes = await requestPath(port, audioPath);
       assert.equal(audioRes.statusCode, 200);
+      assert.match(audioRes.headers['content-type'] || '', /audio\/mpeg|audio\/mp3/);
     }
 
     const blockedServer = await requestPath(port, '/server.js');
@@ -82,5 +83,23 @@ test('static server serves index, scripts, styles, and assets while blocking ser
     assert.equal(blockedPkg.statusCode, 404);
   } finally {
     await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test('client files use relative asset paths compatible with GitHub Pages subpaths', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  for (const filename of ['index.html', 'style.css', 'game.js', 'filterblade.js']) {
+    const content = fs.readFileSync(path.join(__dirname, filename), 'utf8');
+    assert.doesNotMatch(
+      content,
+      /['"(]\/assets\//,
+      `${filename} must use relative ./assets/ paths for GitHub Pages subpath hosting`
+    );
+    assert.doesNotMatch(
+      content,
+      /assets\/aistudio/,
+      `${filename} must not depend on server-only /assets/aistudio paths`
+    );
   }
 });
