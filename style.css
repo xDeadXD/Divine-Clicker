@@ -25,7 +25,7 @@
   --font-drop: 'Fontin SmallCaps', 'Cinzel', Georgia, serif;
   --font-poe: 'Cinzel', 'Trajan Pro', Georgia, serif;
   --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-ui: 'Cormorant Garamond', Georgia, serif;
 }
 
 *,
@@ -81,8 +81,8 @@ body.assets-loading #corner-right {
   height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 50% 48%, rgba(16, 18, 22, 0.1) 0%, rgba(4, 5, 8, 0.56) 100%),
-    url('./assets/ui/atlas_bg.webp') center / cover no-repeat fixed;
+    radial-gradient(ellipse at 50% 48%, rgba(8, 10, 14, 0.24) 0%, rgba(4, 5, 8, 0.72) 100%),
+    url('./assets/ui/atlas_bg_poe2.jpg?v=25') center / cover no-repeat fixed;
 }
 
 .ui-slice {
@@ -472,8 +472,13 @@ body.assets-loading #corner-right {
   transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease;
 }
 
-.astrolabe-stage:hover {
-  filter: brightness(1.09);
+.astrolabe-stage:not(.is-active-map):hover {
+  filter: brightness(1.1);
+}
+
+.astrolabe-stage.is-active-map {
+  cursor: default;
+  pointer-events: none;
 }
 
 .astrolabe-stage.astrolabe-pulse {
@@ -557,7 +562,8 @@ body.labels-hidden #loot-layer .loot-label {
 }
 
 /* ==========================================================================
-   FILTERBLADE DOM LOOT LABELS (PRESERVED GAMEPLAY STYLING — TEXT ONLY)
+   FILTERBLADE / NEVERSINK POE 2 DOM LOOT LABELS (EXACT 1-REGULAR.FILTER SPEC)
+   Sharp rectangular PoE 2 item plates, Fontin SmallCaps, exact RGBA tiers
    ========================================================================== */
 
 .loot-label {
@@ -572,124 +578,136 @@ body.labels-hidden #loot-layer .loot-label {
   font-variant: normal;
   font-weight: 400;
   text-transform: none;
-  letter-spacing: 0.015em;
-  line-height: 1.15;
+  letter-spacing: 0.012em;
+  line-height: 1.12;
   text-rendering: optimizeLegibility;
   white-space: nowrap;
-  border-radius: 1px;
+  border-radius: 0;
   pointer-events: auto;
   cursor: pointer;
   transform-origin: center center;
   will-change: transform, opacity;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.85);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+    0 3px 10px rgba(0, 0, 0, 0.9);
   transition: filter 0.08s ease, box-shadow 0.08s ease;
 }
 
 .loot-label:hover {
-  z-index: 60 !important;
+  z-index: 65 !important;
   filter: brightness(1.08);
   box-shadow:
     0 0 0 1.5px #ffffff,
-    0 0 16px rgba(255, 255, 255, 0.6);
+    0 0 16px rgba(255, 255, 255, 0.58),
+    0 4px 14px rgba(0, 0, 0, 0.94);
 }
 
-/* S++, S+ & S-Tier (Mirror of Kalandra, Hinekora's Lock, Divine Orb, Perfect Orbs) — Crisp White & Crimson FilterBlade card */
+/* S++, S+ & S-Tier (Mirror of Kalandra, Hinekora's Lock, Divine Orb, Perfect Orbs)
+   NeverSink $tier->s: SetFontSize 45 | BG 255 255 255 | Text 255 0 0 | Border 255 0 0 */
 .loot-label.tier-spp,
 .loot-label.tier-sp,
 .loot-label.tier-s {
-  background: #ffffff;
-  color: #dc0000;
-  border: 2px solid #dc0000;
-  border-radius: 2px;
-  font-size: 25px;
-  padding: 2px 14px 3px;
+  background: rgb(255, 255, 255);
+  color: rgb(255, 0, 0);
+  border: 2px solid rgb(255, 0, 0);
+  border-radius: 0;
+  font-size: 24px;
+  padding: 3px 14px 4px;
   z-index: 45;
   box-shadow:
-    0 0 14px rgba(220, 0, 0, 0.36),
-    0 4px 12px rgba(0, 0, 0, 0.9);
+    0 0 18px rgba(255, 0, 0, 0.42),
+    0 4px 14px rgba(0, 0, 0, 0.92);
 }
 
 .loot-label.tier-sp {
-  font-size: 27px;
+  font-size: 25.5px;
   padding: 3px 16px 4px;
   z-index: 50;
   box-shadow:
-    0 0 18px rgba(220, 0, 0, 0.52),
-    0 0 8px rgba(255, 255, 255, 0.45),
-    0 4px 12px rgba(0, 0, 0, 0.92);
+    0 0 22px rgba(255, 0, 0, 0.56),
+    0 0 8px rgba(255, 255, 255, 0.5),
+    0 4px 14px rgba(0, 0, 0, 0.94);
 }
 
 .loot-label.tier-spp {
-  font-size: 29px;
+  font-size: 27px;
   padding: 4px 18px 5px;
   z-index: 55;
   box-shadow:
-    0 0 24px rgba(220, 0, 0, 0.68),
-    0 0 12px rgba(255, 255, 255, 0.58),
-    0 4px 14px rgba(0, 0, 0, 0.94);
+    0 0 28px rgba(255, 0, 0, 0.72),
+    0 0 12px rgba(255, 255, 255, 0.62),
+    0 5px 16px rgba(0, 0, 0, 0.96);
 }
 
 .loot-label.tier-spp:hover,
 .loot-label.tier-sp:hover,
 .loot-label.tier-s:hover {
   box-shadow:
-    0 0 0 2px #ff3b3b,
-    0 0 24px rgba(255, 35, 35, 0.82);
+    0 0 0 2px #ff2a2a,
+    0 0 26px rgba(255, 32, 32, 0.85),
+    0 4px 14px rgba(0, 0, 0, 0.95);
 }
 
-/* A+ Tier (Greater Exalted Orb, Greater Chaos Orb) — FilterBlade Coral-Red w/ Bright Highlight Trim */
+/* A+ Tier (Greater Exalted Orb, Greater Chaos Orb)
+   NeverSink $tier->a: SetFontSize 45 | BG 245 105 90 | Text 255 255 255 | Border 255 255 255 */
 .loot-label.tier-ap {
-  background: #f4604a;
-  color: #0e0a09;
-  border: 1.5px solid #ffe49c;
-  font-size: 20.5px;
-  padding: 3px 11px;
+  background: rgb(245, 105, 90);
+  color: rgb(255, 255, 255);
+  border: 2px solid rgb(255, 255, 255);
+  font-size: 21.5px;
+  padding: 3px 12px;
   z-index: 35;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   box-shadow:
-    0 0 12px rgba(244, 96, 74, 0.42),
-    0 3px 9px rgba(0, 0, 0, 0.85);
+    0 0 14px rgba(245, 105, 90, 0.45),
+    0 3px 10px rgba(0, 0, 0, 0.88);
 }
 
-/* A-Tier (Chaos Orb, Gemcutter's Prism) — FilterBlade Burnt Copper-Orange */
+/* A-Tier (Chaos Orb, Gemcutter's Prism)
+   NeverSink $tier->c: SetFontSize 42 | BG 245 139 87 | Text 0 0 0 | Border 0 0 0 */
 .loot-label.tier-a {
-  background: #d66d2c;
-  color: #0e0a08;
-  border: 1px solid #261206;
-  font-size: 19px;
-  padding: 3px 10px;
+  background: rgb(245, 139, 87);
+  color: rgb(0, 0, 0);
+  border: 1.5px solid rgb(0, 0, 0);
+  font-size: 19.5px;
+  padding: 2.5px 11px;
   z-index: 30;
 }
 
-/* B-Tier (Exalted Orb) — FilterBlade Honey / Amber Gold */
+/* B-Tier (Exalted Orb)
+   NeverSink $tier->d: SetFontSize 40 | BG 240 180 100 | Text 0 0 0 | Border 0 0 0 */
 .loot-label.tier-b {
-  background: #dfa750;
-  color: #100c07;
-  border: 1px solid #2a1d09;
+  background: rgb(240, 180, 100);
+  color: rgb(0, 0, 0);
+  border: 1.5px solid rgb(0, 0, 0);
   font-size: 18px;
-  padding: 3px 10px;
+  padding: 2.5px 10px;
   z-index: 25;
 }
 
-/* D & F-Tier Clutter (Scroll of Wisdom, Transmutation, Augmentation, Scrap, Regal Shard) — Dark Translucent & Muted Tan */
+/* D-Tier Clutter (Armourer's Scrap, Regal Shard, Orb of Augmentation)
+   NeverSink $tier->supplymagic: SetFontSize 38 | BG 0 0 0 214 | Text 220 175 132 | Border 220 175 132 */
 .loot-label.tier-d {
-  background: rgba(14, 13, 10, 0.90);
-  color: #dfcfa6;
-  border: 1px solid #84734d;
-  font-size: 14px;
+  background: rgba(0, 0, 0, 0.84);
+  color: rgb(220, 175, 132);
+  border: 1px solid rgb(220, 175, 132);
+  font-size: 15px;
   padding: 2px 8px;
   z-index: 15;
 }
 
+/* F-Tier Clutter (Scroll of Wisdom, Orb of Transmutation)
+   NeverSink $tier->supplieslow: SetFontSize 35 | BG 0 0 0 200 | Text 170 158 130 */
 .loot-label.tier-f {
-  background: rgba(12, 11, 9, 0.88);
-  color: #c4b48e;
-  border: 1px solid #6b5d3f;
-  font-size: 13px;
+  background: rgba(0, 0, 0, 0.78);
+  color: rgb(170, 158, 130);
+  border: 1px solid rgba(130, 118, 96, 0.45);
+  font-size: 13.5px;
   padding: 2px 8px;
   z-index: 10;
 }
 
-/* Urgent expiration pulse when remaining lifetime < 0.7s */
+/* Urgent expiration pulse when remaining lifetime < 0.3s */
 .loot-label.expiring-soon {
   animation: expireBlink 0.22s ease-in-out infinite alternate;
 }
@@ -700,177 +718,231 @@ body.labels-hidden #loot-layer .loot-label {
 }
 
 /* ==========================================================================
-   BOTTOM CENTER: PARCHMENT SCROLL BANNER + RIVETED ACTION DOCK
+   BOTTOM CENTER: WEATHERED POE 2 PARCHMENT SCROLL + 3-COMPARTMENT DOCK
    ========================================================================== */
 
 .bottom-center-stack {
   position: absolute;
-  bottom: 0;
+  bottom: clamp(4px, 0.55vw, 10px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 25;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: clamp(3px, 0.35vw, 6px);
   pointer-events: none;
 }
 
 .scroll-banner-wrap {
   position: relative;
-  width: clamp(270px, 26vw, 415px);
-  margin-bottom: clamp(4px, 0.45vw, 9px);
+  display: inline-block;
   line-height: 0;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.92));
 }
 
 .scroll-banner-img {
-  width: 100%;
+  width: clamp(410px, 39vw, 545px);
   height: auto;
+  max-width: 90vw;
   display: block;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
 }
 
 .scroll-feed-text {
   position: absolute;
-  top: 15%;
-  bottom: 17%;
-  left: 9.5%;
-  right: 9.5%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 7.8%;
+  right: 7.8%;
+  top: 50%;
+  transform: translateY(-50%);
   text-align: center;
   font-family: var(--font-serif);
   font-variant: normal;
   font-weight: 700;
-  font-size: clamp(9.5px, 0.86vw, 14px);
-  line-height: 1.15;
-  color: #28170a;
+  font-size: clamp(10.5px, 0.88vw, 13.5px);
+  line-height: 1.18;
+  letter-spacing: 0.012em;
+  color: #21140b;
+  text-shadow:
+    0 1px 0 rgba(255, 240, 206, 0.45),
+    0 0 1px rgba(33, 20, 11, 0.25);
+  white-space: nowrap;
   overflow: hidden;
-  padding: 0 4px;
+  text-overflow: ellipsis;
 }
 
 .bottom-dock-wrap {
   position: relative;
-  width: clamp(390px, 38.5vw, 620px);
+  display: inline-block;
   line-height: 0;
   pointer-events: auto;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.94));
 }
 
 .bottom-dock-img {
-  width: 100%;
-  height: auto;
+  height: clamp(50px, 4.7vw, 72px);
+  width: auto;
+  max-width: min(92vw, 640px);
   display: block;
-  filter: drop-shadow(0 -2px 12px rgba(0, 0, 0, 0.88));
 }
 
-/* Mechanic icon sockets inside riveted bottom dock (Breach left square & Abyss left square) */
+/* Pixel-aligned official PoE2DB Breach & Abyss icons seated inside carved filigree iron sockets */
 .dock-mechanic-slot {
   position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  /* Defaults aligned to scroll_dock_sheet.jpg; refined per-pixel in game.js */
-  top: 26%;
-  height: 48%;
-  aspect-ratio: 1 / 1;
-  transform: translateX(-50%);
+  z-index: 2;
+  /* Defaults aligned to bottom_dock_poe2.jpg; refined dynamically from pixels */
+  top: 22%;
+  height: 56%;
 }
 
 .dock-breach-slot {
-  left: 12.4%;
+  left: 9.2%;
+  width: 7.4%;
 }
 
 .dock-abyss-slot {
-  left: 35.7%;
+  left: 38.2%;
+  width: 7.4%;
 }
 
 .dock-mechanic-icon {
-  width: 88%;
-  height: 88%;
+  width: 82%;
+  height: 82%;
   object-fit: contain;
   display: block;
 }
 
 .dock-breach-slot .dock-mechanic-icon {
-  filter: drop-shadow(0 0 6px rgba(176, 84, 248, 0.55));
+  filter: drop-shadow(0 0 6px rgba(186, 98, 255, 0.65));
 }
 
 .dock-abyss-slot .dock-mechanic-icon {
-  filter: drop-shadow(0 0 6px rgba(52, 211, 120, 0.55));
+  filter: drop-shadow(0 0 6px rgba(72, 224, 130, 0.65));
 }
 
-/* Interactive hitbox placed over baked LABELS: ON button ONLY */
-.dock-labels-hitbox {
+/* Sculpted metallic nameplate text overlays over Breach (plum) & Abyss (emerald) hammered iron plates */
+.dock-plate-label {
   position: absolute;
-  /* Default % fallback overwritten with exact pixel-measured coords in game.js */
-  left: 56%;
-  top: 30%;
-  width: 15%;
-  height: 40%;
-  padding: 0;
-  border: none;
-  border-radius: 3px;
-  background: transparent;
-  cursor: pointer;
-  outline: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: box-shadow 0.14s ease, filter 0.14s ease;
-}
-
-.dock-labels-hitbox:hover {
-  box-shadow: 0 0 0 1px rgba(242, 206, 128, 0.72), 0 0 12px rgba(242, 206, 128, 0.45);
-}
-
-.dock-labels-hitbox:active {
-  filter: brightness(0.9);
-}
-
-.dock-labels-off-badge {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 7%;
-  background: linear-gradient(180deg, #27221d 0%, #15120f 100%);
-  border: 1px solid #6b583f;
-  border-radius: 3px;
-  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  z-index: 2;
+  top: 23%;
+  height: 54%;
   font-family: var(--font-poe);
   font-variant: small-caps;
   font-weight: 700;
-  font-size: clamp(6.5px, 0.62vw, 10px);
-  letter-spacing: 0.01em;
-  color: #a89c86;
-  white-space: nowrap;
-  overflow: hidden;
+  font-size: clamp(11.5px, 1.05vw, 15.5px);
+  letter-spacing: 0.12em;
+  color: #efe2c8;
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.98),
+    0 0 8px rgba(0, 0, 0, 0.75);
+  user-select: none;
 }
 
-.dock-off-dot {
-  width: clamp(5px, 0.45vw, 7.5px);
-  height: clamp(5px, 0.45vw, 7.5px);
+.dock-breach-label {
+  left: 17.5%;
+  width: 19.6%;
+}
+
+.dock-abyss-label {
+  left: 46.5%;
+  width: 19.6%;
+}
+
+/* Interactive LABELS: ON/OFF hitbox overlaid cleanly on the right forged-iron toggle plate */
+.dock-labels-hitbox {
+  position: absolute;
+  left: 66.8%;
+  top: 22%;
+  width: 24.4%;
+  height: 56%;
+  z-index: 3;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  transition: filter 0.14s ease, background-color 0.14s ease;
+}
+
+.dock-labels-hitbox:hover {
+  background: rgba(255, 224, 158, 0.09);
+  box-shadow: inset 0 0 12px rgba(242, 198, 108, 0.28);
+}
+
+.dock-labels-hitbox:active {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.dock-labels-text {
+  position: absolute;
+  left: 8%;
+  width: 64%;
+  top: 50%;
+  transform: translateY(-51%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-poe);
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: clamp(8.5px, 0.68vw, 10.4px);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: #f0dfb8;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.98);
+  white-space: nowrap;
+  text-align: center;
+  pointer-events: none;
+}
+
+.dock-labels-hitbox.is-off .dock-labels-text {
+  color: #9e917d;
+}
+
+/* Glowing rune gem seated directly inside the sculpted circular gold bezel on the right of the dock */
+.dock-labels-led {
+  position: absolute;
+  left: 84.5%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: #2f2822;
-  border: 1px solid #6b583f;
-  box-shadow: inset 0 1px 2px #000;
-  flex-shrink: 0;
+  pointer-events: none;
+  border: 1px solid rgba(0, 0, 0, 0.85);
+}
+
+.dock-labels-led.is-on {
+  background: radial-gradient(circle at 35% 32%, #d4ffe3 0%, #34d97c 58%, #0f6835 100%);
+  box-shadow:
+    0 0 8px rgba(54, 224, 128, 0.95),
+    inset 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+.dock-labels-led.is-off {
+  background: radial-gradient(circle at 40% 35%, #4a423a 0%, #1f1b18 75%, #0d0b0a 100%);
+  box-shadow: inset 0 1px 3px #000;
 }
 
 /* ==========================================================================
-   BOTTOM CORNERS (GAUNTLET + GROUND LOOT, MUTED TIP TEXT)
+   BOTTOM LEFT CORNER COUNTER
    ========================================================================== */
 
 .corner-left {
   position: absolute;
-  left: clamp(10px, 0.9vw, 18px);
-  bottom: clamp(7px, 0.68vw, 14px);
+  left: clamp(12px, 1vw, 20px);
+  bottom: clamp(10px, 0.85vw, 16px);
   z-index: 25;
   display: flex;
   align-items: center;
-  gap: clamp(5px, 0.45vw, 9px);
+  gap: clamp(6px, 0.5vw, 9px);
   pointer-events: none;
 }
 
@@ -895,39 +967,19 @@ body.labels-hidden #loot-layer .loot-label {
   font-weight: 700;
 }
 
-.corner-right {
-  position: absolute;
-  right: clamp(12px, 1.1vw, 22px);
-  bottom: clamp(8px, 0.72vw, 15px);
-  z-index: 25;
-  pointer-events: none;
-}
-
-.corner-tip-text {
-  font-family: var(--font-serif);
-  font-variant: normal;
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(11px, 0.95vw, 15.5px);
-  color: rgba(208, 196, 170, 0.72);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.98);
-  white-space: nowrap;
-}
-
 /* ==========================================================================
-   POE DARK-IRON & GOLD MODALS (LOOT BREAKDOWN & HELP)
+   POST-MAP LOOT BREAKDOWN MODAL — HIGH-DETAIL ORIGINAL POE 2 RECREATION
    ========================================================================== */
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(4, 4, 7, 0.84);
-  backdrop-filter: blur(4px);
+  background: rgba(3, 3, 6, 0.86);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: clamp(8px, 1.4vw, 20px);
 }
 
 .sr-only {
@@ -944,87 +996,117 @@ body.labels-hidden #loot-layer .loot-label {
 
 .summary-modal-frame {
   position: relative;
-  width: min(94vw, 1240px);
-  height: min(92vh, 840px);
+  width: min(94vw, 1140px, calc(93vh * 1376 / 940));
+  aspect-ratio: 1376 / 940;
   display: flex;
   flex-direction: column;
   user-select: none;
-  filter: drop-shadow(0 18px 48px rgba(0, 0, 0, 0.96));
+  filter: drop-shadow(0 28px 68px rgba(0, 0, 0, 0.97));
 }
 
-.modal-frame-canvas {
+.modal-frame-img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: fill;
+  display: block;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
-.modal-close-hitbox {
+/* Sculpted top crest title plaque inside the winged forged-iron header */
+.modal-title-plaque {
   position: absolute;
-  z-index: 6;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
+  left: 36.8%;
+  width: 26.4%;
+  top: 10.9%;
+  height: 6.1%;
+  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: filter 0.14s ease, transform 0.1s ease;
+  pointer-events: none;
+  padding: 0 8px;
 }
 
-.modal-close-hitbox:hover {
-  filter: brightness(1.3) drop-shadow(0 0 8px rgba(232, 185, 102, 0.65));
+.modal-crest-title {
+  margin: 0;
+  font-family: var(--font-poe);
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: clamp(13px, 1.38vw, 18.5px);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: #f4dfae;
+  text-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.98),
+    0 0 10px rgba(224, 178, 92, 0.25);
+  white-space: nowrap;
 }
 
-.modal-close-hitbox:active {
-  transform: scale(0.95);
+.modal-close-sprite-btn {
+  position: absolute;
+  right: 3.1%;
+  top: 10.4%;
+  width: clamp(30px, 3.2vw, 40px);
+  height: clamp(30px, 3.2vw, 40px);
+  z-index: 6;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: filter 0.14s ease, transform 0.08s ease;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.95));
 }
 
-.modal-close-sprite {
+.modal-close-sprite-btn:hover {
+  filter: brightness(1.24) drop-shadow(0 0 9px rgba(236, 198, 120, 0.55));
+}
+
+.modal-close-sprite-btn:active {
+  transform: scale(0.94);
+}
+
+.modal-close-sprite-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  display: block;
 }
 
 .summary-modal-content {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: var(--modal-pad-top, 58px) var(--modal-pad-x, 42px) var(--modal-pad-bot, 26px);
-  gap: clamp(6px, 0.95vh, 11px);
+  padding: 13.8% 4.8% 4.0%;
+  gap: clamp(5px, 0.75vh, 9px);
 }
 
-.modal-subtitle-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: clamp(18px, 2.5vh, 26px);
-  flex-shrink: 0;
-}
-
-.modal-subtitle {
+.modal-asset-subtitle {
   margin: 0;
-  font-family: var(--font-ui);
-  font-variant: normal;
-  font-size: clamp(11.5px, 1.05vw, 14px);
-  font-weight: 500;
-  letter-spacing: 0.015em;
-  color: #b7ada0;
   text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  font-family: var(--font-serif);
+  font-variant: normal;
+  font-weight: 600;
+  font-size: clamp(12.5px, 1.05vw, 15.5px);
+  letter-spacing: 0.025em;
+  color: #d6cbb7;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.98);
+  flex-shrink: 0;
+  line-height: 1.15;
 }
 
-/* 5-SLOT STAT SUMMARY BAR */
+/* RIVETED FORGED-IRON 5-SLOT STAT BAR */
 .modal-stat-bar-wrap {
   position: relative;
   width: 100%;
   flex-shrink: 0;
   line-height: 0;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.92));
 }
 
 .modal-stat-bar-img {
@@ -1033,285 +1115,411 @@ body.labels-hidden #loot-layer .loot-label {
   display: block;
 }
 
-.modal-stat-cell {
+.modal-stat-overlay {
   position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
+  inset: 0;
   pointer-events: none;
 }
 
-.modal-stat-val {
-  font-family: var(--font-serif);
-  font-variant: normal;
-  font-weight: 700;
-  font-size: clamp(15px, 1.85vw, 25px);
-  letter-spacing: 0.02em;
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.98),
-    0 0 8px rgba(0, 0, 0, 0.72);
+.modal-stat-cell {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(5px, 0.7vh, 9px);
+  padding: 2px 6px;
+}
+
+.modal-kpi-label {
+  font-family: var(--font-poe);
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: clamp(9px, 0.8vw, 11.5px);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: #c8bca4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.98);
   white-space: nowrap;
 }
 
-.modal-stat-val.val-light-grey {
-  color: #d6dae0;
+.modal-kpi-val {
+  font-family: var(--font-poe);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  font-weight: 700;
+  font-size: clamp(16px, 1.8vw, 25px);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.98);
+  white-space: nowrap;
 }
 
-.modal-stat-val.val-gold {
-  color: #f3c44b;
+.modal-kpi-val.val-light-grey {
+  color: #eef1f5;
+}
+
+.modal-kpi-val.val-gold {
+  color: #f5c954;
   text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.98),
-    0 0 10px rgba(243, 196, 75, 0.35);
+    0 2px 6px rgba(0, 0, 0, 0.98),
+    0 0 14px rgba(245, 201, 84, 0.36);
 }
 
-.modal-stat-val.val-crimson {
-  color: #e44242;
+.modal-kpi-val.val-crimson {
+  color: #ed4c4c;
   text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.98),
-    0 0 10px rgba(228, 66, 66, 0.35);
+    0 2px 6px rgba(0, 0, 0, 0.98),
+    0 0 14px rgba(237, 76, 76, 0.38);
 }
 
-.modal-stat-val.val-grey-white {
-  color: #dfe3e8;
+.modal-kpi-val.val-grey-white {
+  color: #e4e8ee;
 }
 
-/* LEDGER TABLE (HEADER + STACKABLE ROW STRIPS) */
+/* HAMMERED-IRON CURRENCY LEDGER TABLE */
 .modal-ledger-wrap {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  width: 100%;
+  overflow: hidden;
 }
 
-.ledger-header-wrap {
+.modal-ledger-header-wrap {
+  position: relative;
   width: 100%;
+  padding-right: 10px;
   flex-shrink: 0;
   line-height: 0;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.88));
 }
 
-.ledger-header-img {
+.modal-ledger-header-img {
   width: 100%;
   height: auto;
   display: block;
 }
 
-.ledger-rows-scroll {
+.modal-ledger-header-cols {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 10px;
+  pointer-events: none;
+}
+
+.ledger-hdr-cell {
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-poe);
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: clamp(10.5px, 0.95vw, 13.5px);
+  letter-spacing: 0.085em;
+  color: #e5d2ab;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.98);
+  white-space: nowrap;
+}
+
+.ledger-hdr-cell.ledger-hdr-name {
+  justify-content: flex-start;
+  padding-left: 14px;
+}
+
+.ledger-hdr-cell:not(.ledger-hdr-socket)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16%;
+  bottom: 16%;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(196, 164, 108, 0.06) 0%,
+    rgba(196, 164, 108, 0.34) 50%,
+    rgba(196, 164, 108, 0.06) 100%
+  );
+}
+
+.modal-ledger-scroll {
   flex: 1;
   min-height: 0;
-  width: calc(100% + 7px);
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
+  padding-right: 4px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(154, 128, 86, 0.65) rgba(10, 10, 14, 0.7);
+  scrollbar-color: rgba(176, 140, 84, 0.72) rgba(10, 9, 12, 0.88);
 }
 
-.ledger-rows-scroll::-webkit-scrollbar {
-  width: 7px;
+.modal-ledger-scroll::-webkit-scrollbar {
+  width: 6px;
 }
 
-.ledger-rows-scroll::-webkit-scrollbar-track {
-  background: rgba(10, 10, 14, 0.72);
-  border-left: 1px solid rgba(90, 76, 56, 0.35);
-}
-
-.ledger-rows-scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(164, 136, 92, 0.75) 0%, rgba(108, 88, 58, 0.8) 100%);
+.modal-ledger-scroll::-webkit-scrollbar-track {
+  background: rgba(10, 9, 12, 0.88);
   border-radius: 3px;
 }
 
-.ledger-rows-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(206, 174, 118, 0.9);
+.modal-ledger-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b89252 0%, #7d6033 100%);
+  border-radius: 3px;
 }
 
-.ledger-rows-list {
-  width: 100%;
+.modal-ledger-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #dcba78 0%, #9b7940 100%);
+}
+
+.modal-ledger-body {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
+  padding-top: 3px;
 }
 
-.ledger-row {
+.modal-ledger-row {
   position: relative;
   width: 100%;
-  height: clamp(46px, 6.2vh, 56px);
-  flex-shrink: 0;
-  line-height: 0;
+  aspect-ratio: 1320 / 72;
+  min-height: 46px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
   transition: filter 0.12s ease;
 }
 
-.ledger-row-bg {
+.modal-ledger-row:hover {
+  filter: brightness(1.16);
+}
+
+.ledger-cell {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ledger-cell:not(.ledger-cell-socket):not(.ledger-cell-name)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16%;
+  bottom: 16%;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(130, 122, 110, 0.04) 0%,
+    rgba(130, 122, 110, 0.24) 50%,
+    rgba(130, 122, 110, 0.04) 100%
+  );
+}
+
+.ledger-cell-socket {
+  padding: 5px;
+}
+
+.ledger-orb-img {
+  width: 80%;
+  height: 80%;
+  max-width: 38px;
+  max-height: 38px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.95));
+}
+
+.ledger-cell-name {
+  justify-content: flex-start;
+  padding: 0 14px;
+}
+
+.ledger-currency-name {
+  display: block;
+  font-family: var(--font-serif);
+  font-variant: normal;
+  font-weight: 600;
+  font-size: clamp(13px, 1.16vw, 16px);
+  color: #f0e6d2;
+  letter-spacing: 0.015em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.98);
+}
+
+/* Sculpted Gothic Heraldic Shield Badge with Crisp Centered Cinzel Tier Text */
+.ledger-tier-shield-wrap {
+  position: relative;
+  height: 82%;
+  max-height: 42px;
+  aspect-ratio: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ledger-tier-shield-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95));
+}
+
+.ledger-tier-shield-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 5%;
+  font-family: var(--font-poe);
+  font-variant: normal;
+  font-weight: 800;
+  font-size: clamp(9.5px, 0.82vw, 11.5px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #fff6e2;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.98),
+    0 0 4px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+}
+
+.ledger-tier-shield-text.tier-txt-spp {
+  font-size: clamp(8.5px, 0.72vw, 10.5px);
+  color: #fff7df;
+}
+
+.ledger-tier-shield-text.tier-txt-iron {
+  color: #dde2e8;
+}
+
+.ledger-num-cell {
+  font-family: var(--font-poe);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  font-weight: 600;
+  font-size: clamp(12px, 1.05vw, 14.5px);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.98);
+  white-space: nowrap;
+}
+
+.num-base-pos {
+  color: #e8dcc0;
+}
+
+.num-base-neg {
+  color: #e45050;
+}
+
+.num-count-active {
+  color: #f0e6d2;
+}
+
+.num-count-zero {
+  color: #706c68;
+}
+
+.num-net-pos {
+  color: #f4c64f;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.98),
+    0 0 8px rgba(244, 198, 79, 0.34);
+}
+
+.num-net-neg {
+  color: #f04a4a;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.98),
+    0 0 8px rgba(240, 74, 74, 0.36);
+}
+
+.num-net-zero {
+  color: #706c68;
+}
+
+/* SCULPTED CRIMSON-GOLD & FORGED-IRON FOOTER BUTTONS */
+.modal-footer-sprites {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+.modal-sprite-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(192px, 18.5vw, 232px);
+  height: clamp(42px, 4.1vw, 52px);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+  filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.92));
+  transition: filter 0.14s ease, transform 0.08s ease;
+}
+
+.modal-sprite-btn:hover {
+  filter: brightness(1.16) drop-shadow(0 0 14px rgba(226, 178, 92, 0.44));
+}
+
+.modal-sprite-btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.modal-sprite-btn-img {
   width: 100%;
   height: 100%;
   object-fit: fill;
   display: block;
 }
 
-.ledger-row:hover .ledger-row-bg {
-  filter: brightness(1.18) contrast(1.04);
-}
-
-.ledger-row:hover::after {
-  content: '';
+.modal-sprite-btn-label {
   position: absolute;
-  inset: 1px 1px;
-  border: 1px solid rgba(212, 168, 86, 0.34);
-  background: rgba(212, 168, 86, 0.045);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 22px;
+  font-family: var(--font-poe);
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: clamp(10.5px, 0.92vw, 13px);
+  letter-spacing: 0.055em;
+  color: #f5e6c8;
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.98),
+    0 0 8px rgba(0, 0, 0, 0.72);
+  white-space: nowrap;
   pointer-events: none;
 }
 
-.ledger-cell {
-  position: absolute;
-  top: 4%;
-  bottom: 4%;
-  display: flex;
-  align-items: center;
-  line-height: 1.1;
-  overflow: hidden;
+.modal-sprite-btn-primary .modal-sprite-btn-label {
+  color: #fff3da;
 }
 
-.row-socket-cell {
-  justify-content: center;
-  padding: 4px;
-}
-
-.row-orb-icon {
-  width: auto;
-  height: 78%;
-  max-width: 78%;
-  max-height: 78%;
-  object-fit: contain;
-  display: block;
-  margin: auto;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.92));
-}
-
-.row-orb-icon.orb-greater {
-  filter:
-    drop-shadow(0 0 4px rgba(255, 196, 86, 0.55))
-    drop-shadow(0 1px 3px rgba(0, 0, 0, 0.92))
-    brightness(1.08);
-}
-
-.row-orb-icon.orb-perfect {
-  filter:
-    drop-shadow(0 0 6px rgba(255, 110, 92, 0.72))
-    drop-shadow(0 1px 3px rgba(0, 0, 0, 0.92))
-    brightness(1.12);
-}
-
-.row-col-name {
-  justify-content: flex-start;
-  padding-left: 12px;
-  padding-right: 8px;
-}
-
-.ledger-currency-name {
-  font-family: var(--font-serif);
-  font-variant: normal;
-  font-weight: 600;
-  font-size: clamp(12px, 1.15vw, 15.5px);
-  color: #efe5cf;
-  letter-spacing: 0.015em;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.96);
-}
-
-.ledger-row:hover .ledger-currency-name {
-  color: #fff6e0;
-}
-
-.row-col-tier {
-  justify-content: center;
-}
-
-.row-tier-badge {
-  height: 82%;
-  max-height: 36px;
-  width: auto;
-  object-fit: contain;
-  display: block;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85));
-}
-
-.row-col-num {
-  justify-content: center;
-  font-family: var(--font-serif);
-  font-variant: normal;
-  font-weight: 700;
-  font-size: clamp(13px, 1.25vw, 16px);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.96);
-  white-space: nowrap;
-}
-
-.num-base-pos {
-  color: #e4d8bd;
-}
-
-.num-base-neg {
-  color: #e04d4d;
-}
-
-.num-count-active {
-  color: #efe5cf;
-}
-
-.num-count-zero {
-  color: #777471;
-}
-
-.num-net-pos {
-  color: #f3c44b;
-  text-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.98),
-    0 0 8px rgba(243, 196, 75, 0.3);
-}
-
-.num-net-neg {
-  color: #f04848;
-  text-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.98),
-    0 0 8px rgba(240, 72, 72, 0.3);
-}
-
-.num-net-zero {
-  color: #777471;
-}
-
-/* FOOTER ACTION BUTTONS */
-.modal-footer-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
+.modal-btn-swords {
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
-  padding-top: clamp(2px, 0.4vh, 6px);
-}
-
-.modal-action-img-btn {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  line-height: 0;
-  transition: filter 0.14s ease, transform 0.1s ease;
-}
-
-.modal-action-img-btn:hover {
-  filter: brightness(1.16) drop-shadow(0 0 10px rgba(232, 185, 102, 0.48));
-}
-
-.modal-action-img-btn:active {
-  transform: translateY(1px);
-}
-
-.modal-action-img {
-  height: clamp(36px, 4.7vh, 46px);
-  width: auto;
-  display: block;
+  color: #f3d79e;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
 }
 
 /* HELP MODAL STYLES (PRESERVED) */
@@ -1384,11 +1592,11 @@ body.labels-hidden #loot-layer .loot-label {
 .help-body {
   padding: 16px 22px;
   overflow-y: auto;
-  font-family: var(--font-ui);
+  font-family: var(--font-serif);
   font-variant: normal;
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: #dfd6c3;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #e4dac5;
 }
 
 .help-section + .help-section {

@@ -9,17 +9,18 @@
   const MAX_CLUTTER_STRIKES = 3;
 
   // ---------------------------------------------------------------------------
-  // 1. CURRENCY DEFINITIONS (16 PoE 2 Currencies — Total Weight = 100.0)
+  // 1. BALANCED POE 2 CURRENCY LOOT TABLE (21 Official PoE2DB Currencies — Total Weight = 100.00)
+  //    40% Valuable Drops (high-tempo dopamine + streak building) / 60% Clutter Hazards
   // ---------------------------------------------------------------------------
   const CURRENCY_TABLE = [
-    // Low-Tier Bait / Clutter (Negative Points — 3 Clicks = Game Over!)
+    // Low-Tier Bait / Clutter (60.0% total — Negative Points, 3 Clicks = Integrity Depleted)
     {
       id: 'scroll_wisdom',
       name: 'Scroll of Wisdom',
       tier: 'F',
       cssClass: 'tier-f',
       points: -20,
-      weight: 31.4,
+      weight: 19.0,
       beam: null,
       color: '#8c8270'
     },
@@ -29,7 +30,7 @@
       tier: 'F',
       cssClass: 'tier-f',
       points: -10,
-      weight: 20.2,
+      weight: 15.0,
       beam: null,
       color: '#5b8dd9'
     },
@@ -39,18 +40,17 @@
       tier: 'D',
       cssClass: 'tier-d',
       points: -15,
-      weight: 15.0,
+      weight: 12.0,
       beam: null,
       color: '#7aa690'
     },
-    // Paired D-Tier (10% total -> 5% each)
     {
       id: 'armourers_scrap',
       name: "Armourer's Scrap",
       tier: 'D',
       cssClass: 'tier-d',
       points: -20,
-      weight: 5.0,
+      weight: 7.5,
       beam: null,
       color: '#9e978e'
     },
@@ -60,95 +60,147 @@
       tier: 'D',
       cssClass: 'tier-d',
       points: -20,
-      weight: 5.0,
+      weight: 6.5,
       beam: null,
       color: '#b89658'
     },
 
-    // High-Tier Valuable Drops (Positive Points)
+    // B-Tier Valuable Drops (18.0% total — White Beam)
+    {
+      id: 'orb_alchemy',
+      name: 'Orb of Alchemy',
+      tier: 'B',
+      cssClass: 'tier-b',
+      points: 20,
+      weight: 5.0,
+      beam: 'white',
+      color: '#f0b464'
+    },
+    {
+      id: 'vaal_orb',
+      name: 'Vaal Orb',
+      tier: 'B',
+      cssClass: 'tier-b',
+      points: 25,
+      weight: 4.5,
+      beam: 'white',
+      color: '#f0b464'
+    },
     {
       id: 'exalted_orb',
       name: 'Exalted Orb',
       tier: 'B',
       cssClass: 'tier-b',
-      points: 25,
-      weight: 10.0,
-      beam: 'gold',
-      color: '#ffd700'
+      points: 30,
+      weight: 8.5,
+      beam: 'white',
+      color: '#f0b464'
     },
-    // Paired A-Tier (7% total -> 3.5% each)
-    {
-      id: 'chaos_orb',
-      name: 'Chaos Orb',
-      tier: 'A',
-      cssClass: 'tier-a',
-      points: 35,
-      weight: 3.5,
-      beam: 'gold',
-      color: '#e5a000'
-    },
+
+    // A-Tier Valuable Drops (13.5% total — Yellow Beam)
     {
       id: 'gemcutters_prism',
       name: "Gemcutter's Prism",
       tier: 'A',
       cssClass: 'tier-a',
-      points: 35,
+      points: 45,
       weight: 3.5,
-      beam: 'gold',
-      color: '#2dd4bf'
+      beam: 'yellow',
+      color: '#f58b57'
     },
-    // Paired A+ Tier (4% total -> 2.0% each)
+    {
+      id: 'chaos_orb',
+      name: 'Chaos Orb',
+      tier: 'A',
+      cssClass: 'tier-a',
+      points: 50,
+      weight: 4.4,
+      beam: 'yellow',
+      color: '#f58b57'
+    },
+    {
+      id: 'orb_chance',
+      name: 'Orb of Chance',
+      tier: 'A',
+      cssClass: 'tier-a',
+      points: 65,
+      weight: 3.0,
+      beam: 'yellow',
+      color: '#f58b57'
+    },
+    {
+      id: 'greater_jewellers_orb',
+      name: "Greater Jeweller's Orb",
+      tier: 'A',
+      cssClass: 'tier-a',
+      points: 90,
+      weight: 2.6,
+      beam: 'yellow',
+      color: '#f58b57'
+    },
+
+    // A+ Tier High-Value Drops (5.8% total — Red Beam)
     {
       id: 'greater_exalted_orb',
       name: 'Greater Exalted Orb',
       tier: 'A+',
       cssClass: 'tier-ap',
-      points: 120,
-      weight: 2.0,
-      beam: 'gold-tall',
-      color: '#ffae00'
+      points: 140,
+      weight: 2.1,
+      beam: 'red-a',
+      color: '#f5695a'
     },
     {
       id: 'greater_chaos_orb',
       name: 'Greater Chaos Orb',
       tier: 'A+',
       cssClass: 'tier-ap',
-      points: 120,
-      weight: 2.0,
-      beam: 'gold-tall',
-      color: '#ff9900'
+      points: 140,
+      weight: 2.1,
+      beam: 'red-a',
+      color: '#f5695a'
     },
-    // Paired S-Tier Flagship (1.3% total -> 1.05% each)
+    {
+      id: 'orb_annulment',
+      name: 'Orb of Annulment',
+      tier: 'A+',
+      cssClass: 'tier-ap',
+      points: 180,
+      weight: 1.6,
+      beam: 'red-a',
+      color: '#f5695a'
+    },
+
+    // S-Tier Flagship Drops (2.54% total — Towering Red Beam + S-Tier Sound)
     {
       id: 'divine_orb',
       name: 'Divine Orb',
       tier: 'S',
       cssClass: 'tier-s',
       points: 500,
-      weight: 0.85,
-      beam: 'divine',
-      color: '#ff2222'
+      weight: 1.1,
+      beam: 'red',
+      color: '#ff1e1e'
     },
     {
       id: 'perfect_jewellers_orb',
       name: "Perfect Jeweller's Orb",
       tier: 'S',
       cssClass: 'tier-s',
-      points: 500,
-      weight: 0.85,
-      beam: 'divine',
-      color: '#ff3838'
+      points: 550,
+      weight: 0.76,
+      beam: 'red',
+      color: '#ff1e1e'
     },
-    // Paired S-Tier Perfect Orbs (0.9% total -> 0.45% each)
     {
       id: 'perfect_exalted_orb',
       name: 'Perfect Exalted Orb',
       tier: 'S',
       cssClass: 'tier-s',
       points: 900,
-      weight: 0.25,
-      beam: 'divine',
-      color: '#ff1111'
+      weight: 0.34,
+      beam: 'red',
+      color: '#ff1e1e'
     },
     {
       id: 'perfect_chaos_orb',
@@ -156,31 +208,33 @@
       tier: 'S',
       cssClass: 'tier-s',
       points: 900,
-      weight: 0.25,
-      beam: 'divine',
-      color: '#ff1111'
+      weight: 0.34,
+      beam: 'red',
+      color: '#ff1e1e'
     },
-    // S+ Tier Jackpot (0.03%)
+
+    // S+ Tier Jackpot (0.12%)
     {
       id: 'hinekoras_lock',
       name: "Hinekora's Lock",
       tier: 'S+',
       cssClass: 'tier-sp',
-      points: 1800,
-      weight: 0.03,
-      beam: 'mythic',
-      color: '#ff1e1e'
+      points: 2200,
+      weight: 0.12,
+      beam: 'red-mythic',
+      color: '#ff0000'
     },
-    // S++ Tier Mythic Jackpot (0.01%)
+
+    // S++ Tier Mythic Jackpot (0.04%)
     {
       id: 'mirror_kalandra',
       name: 'Mirror of Kalandra',
       tier: 'S++',
       cssClass: 'tier-spp',
-      points: 4000,
-      weight: 0.01,
-      beam: 'mythic',
-      color: '#ff2222'
+      points: 5000,
+      weight: 0.04,
+      beam: 'red-mythic',
+      color: '#ff0000'
     }
   ];
 
@@ -193,28 +247,33 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 2. AUDIO & MECHANIC ICON LOADER (s_tier.mp3, below_s_tier.mp3, breach.webp, abyss.webp)
+  // 2. AUDIO & MECHANIC ICON LOADER (S-S++, A+, A-B custom MP3s, breach.webp, abyss.webp)
   // ---------------------------------------------------------------------------
   const customAudioCache = new Map();
   const mechanicIconCache = new Map();
+  const currencyCanvasCache = new Map();
 
   function initAssetHotSwap() {
-    // Load the S-tier and below-S-tier drop sounds
-    const sTierAudio = new Audio('./assets/sounds/s_tier.mp3?v=4');
-    sTierAudio.preload = 'auto';
-    customAudioCache.set('s_tier', sTierAudio);
+    // Load the 3 tier-specific drop sounds uploaded by user (all played at 100% volume)
+    const tierSoundPaths = {
+      s_tier: '/assets/aistudio/S-S___57e3b2ee.mp3',
+      a_plus_tier: '/assets/aistudio/A__b835de96.mp3',
+      a_b_tier: '/assets/aistudio/A-B_7c0c8a02.mp3'
+    };
 
-    const belowSTierAudio = new Audio('./assets/sounds/below_s_tier.mp3?v=4');
-    belowSTierAudio.preload = 'auto';
-    customAudioCache.set('below_s_tier', belowSTierAudio);
+    Object.entries(tierSoundPaths).forEach(([key, src]) => {
+      const clip = new Audio(src);
+      clip.preload = 'auto';
+      customAudioCache.set(key, clip);
+    });
 
-    // Load Breach & Abyss icons
+    // Load official PoE2DB Breach & Abyss Atlas icons
     const breachImg = new Image();
-    breachImg.src = './assets/icons/breach.webp?v=4';
+    breachImg.src = './assets/icons/breach.webp?v=27';
     mechanicIconCache.set('breach', breachImg);
 
     const abyssImg = new Image();
-    abyssImg.src = './assets/icons/abyss.webp?v=4';
+    abyssImg.src = './assets/icons/abyss.webp?v=27';
     mechanicIconCache.set('abyss', abyssImg);
 
     if (window.POE2_ASSET_MANIFEST && typeof window.POE2_ASSET_MANIFEST === 'object') {
@@ -232,36 +291,64 @@
       this.ctx = null;
       this.muted = false;
       this.volume = 0.8;
-      this.lastBelowSDropTime = 0;
+      this.lastAPlusDropTime = 0;
+      this.lastABDropTime = 0;
     }
 
-    // Plays custom ./assets/sounds/s_tier.mp3 when S-Tier or higher (S / S+) drops
-    playSTierDrop() {
-      if (this.muted || this.volume <= 0) return;
-      if (customAudioCache.has('s_tier')) {
-        try {
-          const clip = customAudioCache.get('s_tier').cloneNode();
-          clip.volume = Math.min(1, this.volume * 0.75);
-          clip.play().catch(() => {});
-        } catch (_) {}
+    playClipAtFullVolume(key) {
+      if (this.muted || this.volume <= 0) return false;
+      if (!customAudioCache.has(key)) return false;
+      try {
+        const clip = customAudioCache.get(key).cloneNode();
+        clip.volume = Math.min(1, this.volume);
+        clip.play().catch(() => {});
+        return true;
+      } catch (_) {
+        return false;
       }
     }
 
-    // Plays custom ./assets/sounds/below_s_tier.mp3 when below S-Tier currency drops
+    // Plays S-S++ custom drop sound at 100% volume (never attenuated)
+    playSTierDrop() {
+      return this.playClipAtFullVolume('s_tier');
+    }
+
+    // Plays A+ custom drop sound at 100% volume
+    playAPlusDrop() {
+      if (this.muted || this.volume <= 0) return false;
+      const now = performance.now();
+      if (now - this.lastAPlusDropTime < 25) return false;
+      this.lastAPlusDropTime = now;
+      return this.playClipAtFullVolume('a_plus_tier');
+    }
+
+    // Plays A-B custom drop sound at 100% volume
     playBelowSTierDrop() {
-      if (this.muted || this.volume <= 0) return;
+      if (this.muted || this.volume <= 0) return false;
       const now = performance.now();
       // Slight 35ms debounce so simultaneous multi-orb drops in the same burst frame don't clip
-      if (now - this.lastBelowSDropTime < 35) return;
-      this.lastBelowSDropTime = now;
+      if (now - this.lastABDropTime < 35) return false;
+      this.lastABDropTime = now;
+      return this.playClipAtFullVolume('a_b_tier');
+    }
 
-      if (customAudioCache.has('below_s_tier')) {
-        try {
-          const clip = customAudioCache.get('below_s_tier').cloneNode();
-          clip.volume = Math.min(1, this.volume * 0.85);
-          clip.play().catch(() => {});
-        } catch (_) {}
-      }
+    // Routes any currency drop to its exact tier MP3 (S-S++, A+, A-B) at 100% volume
+    playDropForCurrency(currencyDef) {
+      const fb = window.FilterBladeSpec;
+      const key = fb && typeof fb.getDropSoundKey === 'function'
+        ? fb.getDropSoundKey(currencyDef)
+        : isSTierCurrency(currencyDef)
+        ? 's_tier'
+        : currencyDef && currencyDef.cssClass === 'tier-ap'
+        ? 'a_plus_tier'
+        : currencyDef && currencyDef.points > 0
+        ? 'a_b_tier'
+        : null;
+
+      if (key === 's_tier') return this.playSTierDrop();
+      if (key === 'a_plus_tier') return this.playAPlusDrop();
+      if (key === 'a_b_tier') return this.playBelowSTierDrop();
+      return false;
     }
   }
 
@@ -294,8 +381,10 @@
   const imgScrollBanner = document.getElementById('img-scroll-banner');
   const imgBottomDock = document.getElementById('img-bottom-dock');
   const dockBreachSlot = document.getElementById('dock-breach-slot');
+  const dockBreachLabel = document.getElementById('dock-breach-label');
   const imgDockBreach = document.getElementById('img-dock-breach');
   const dockAbyssSlot = document.getElementById('dock-abyss-slot');
+  const dockAbyssLabel = document.getElementById('dock-abyss-label');
   const imgDockAbyss = document.getElementById('img-dock-abyss');
   const imgGauntlet = document.getElementById('img-gauntlet');
 
@@ -331,7 +420,8 @@
 
   // Dock Label Toggle & Audio Controls
   const btnToggleLabels = document.getElementById('btn-toggle-labels');
-  const dockLabelsOffBadge = document.getElementById('dock-labels-off-badge');
+  const dockLabelsText = document.getElementById('dock-labels-text');
+  const dockLabelsLed = document.getElementById('dock-labels-led');
   const btnMute = document.getElementById('btn-mute');
   const muteSlash = document.getElementById('mute-slash');
   const sliderVolume = document.getElementById('slider-volume');
@@ -339,18 +429,20 @@
   // Post-Map Summary Modal & Help Modal
   const summaryModal = document.getElementById('summary-modal');
   const summaryModalFrame = document.getElementById('summary-modal-frame');
-  const modalFrameCanvas = document.getElementById('modal-frame-canvas');
+  const imgModalFrame = document.getElementById('img-modal-frame');
+  const modalTitlePlaque = document.getElementById('modal-title-plaque');
   const summaryModalContent = document.getElementById('summary-modal-content');
   const imgModalClose = document.getElementById('img-modal-close');
   const imgModalStatBar = document.getElementById('img-modal-stat-bar');
   const modalStatCells = [
-    document.getElementById('modal-kpi-final'),
-    document.getElementById('modal-kpi-best'),
-    document.getElementById('modal-kpi-streak'),
-    document.getElementById('modal-kpi-integrity'),
-    document.getElementById('modal-kpi-accuracy')
+    document.getElementById('modal-stat-cell-0'),
+    document.getElementById('modal-stat-cell-1'),
+    document.getElementById('modal-stat-cell-2'),
+    document.getElementById('modal-stat-cell-3'),
+    document.getElementById('modal-stat-cell-4')
   ];
   const imgLedgerHeader = document.getElementById('img-ledger-header');
+  const modalLedgerHeaderCols = document.getElementById('modal-ledger-header-cols');
   const imgBtnReplay = document.getElementById('img-btn-replay');
   const imgBtnDismiss = document.getElementById('img-btn-dismiss');
   const modalSubtitle = document.getElementById('modal-subtitle');
@@ -371,11 +463,16 @@
     perfect_exalted_orb: './assets/icons/currency/exalted_orb.webp',
     perfect_jewellers_orb: './assets/icons/currency/perfect_jewellers_orb.webp',
     divine_orb: './assets/icons/currency/divine_orb.webp',
+    orb_annulment: './assets/icons/currency/orb_annulment.webp',
     greater_chaos_orb: './assets/icons/currency/chaos_orb.webp',
     greater_exalted_orb: './assets/icons/currency/exalted_orb.webp',
+    greater_jewellers_orb: './assets/icons/currency/greater_jewellers_orb.webp',
+    orb_chance: './assets/icons/currency/orb_chance.webp',
     chaos_orb: './assets/icons/currency/chaos_orb.webp',
     gemcutters_prism: './assets/icons/currency/gemcutters_prism.webp',
     exalted_orb: './assets/icons/currency/exalted_orb.webp',
+    vaal_orb: './assets/icons/currency/vaal_orb.webp',
+    orb_alchemy: './assets/icons/currency/orb_alchemy.webp',
     armourers_scrap: './assets/icons/currency/armourers_scrap.webp',
     regal_shard: './assets/icons/currency/regal_shard.webp',
     orb_augmentation: './assets/icons/currency/orb_augmentation.webp',
@@ -478,15 +575,20 @@
   function toggleLabelsHidden() {
     state.labelsHidden = !state.labelsHidden;
     document.body.classList.toggle('labels-hidden', state.labelsHidden);
-    if (dockLabelsOffBadge) {
-      dockLabelsOffBadge.classList.toggle('hidden', !state.labelsHidden);
+    if (dockLabelsText) {
+      dockLabelsText.textContent = state.labelsHidden ? 'LABELS: OFF' : 'LABELS: ON';
+    }
+    if (dockLabelsLed) {
+      dockLabelsLed.classList.toggle('is-on', !state.labelsHidden);
+      dockLabelsLed.classList.toggle('is-off', state.labelsHidden);
     }
     if (btnToggleLabels) {
+      btnToggleLabels.classList.toggle('is-off', state.labelsHidden);
       btnToggleLabels.setAttribute('aria-pressed', String(!state.labelsHidden));
     }
     setFeed(
       state.labelsHidden
-        ? 'Ground labels hidden ([Z]). Click directly on loot beams/orbs or toggle LABELS: OFF.'
+        ? 'Ground labels hidden ([Z]). Click loot beams or toggle LABELS: OFF to show labels.'
         : 'FilterBlade ground labels enabled (LABELS: ON).'
     );
   }
@@ -522,13 +624,17 @@
   }
 
   function rollCurrency(bonusHighTier = false) {
-    if (bonusHighTier && Math.random() < 0.5) {
+    // Breach & Abyss encounters grant exciting elevated high-tier roll odds while preserving balance
+    if (bonusHighTier && Math.random() < 0.68) {
       const highPool = CURRENCY_TABLE.filter((c) => c.points > 0);
-      const highWeight = highPool.reduce((sum, c) => sum + c.weight, 0);
+      const getBoostedWeight = (c) =>
+        isSTierCurrency(c) ? c.weight * 1.65 : c.tier === 'A+' ? c.weight * 1.35 : c.weight;
+      const highWeight = highPool.reduce((sum, c) => sum + getBoostedWeight(c), 0);
       let r = Math.random() * highWeight;
       for (const item of highPool) {
-        if (r < item.weight) return item;
-        r -= item.weight;
+        const w = getBoostedWeight(item);
+        if (r < w) return item;
+        r -= w;
       }
       return highPool[0];
     }
@@ -561,7 +667,7 @@
     const clampY = (y) => Math.max(minY, Math.min(maxY, y));
 
     const baseX = clampX(item.anchorX);
-    const baseY = clampY(item.anchorY - 18);
+    const baseY = clampY(item.anchorY - (labelH * 0.5 + 6));
 
     const activeOthers = state.items.filter(
       (other) => other.id !== item.id && !other.collected && other.slotReserved
@@ -719,7 +825,7 @@
       hovered: false,
       collected: false,
       labelX: anchorX,
-      labelY: anchorY - 18,
+      labelY: anchorY - 22,
       width: 150,
       height: 30,
       el
@@ -761,12 +867,8 @@
     const ty = Math.round(item.labelY - item.height / 2);
     el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(0.84)`;
 
-    // Play drop sounds when items drop on the ground (S-tier vs below S-tier currency)
-    if (isSTierCurrency(currencyDef)) {
-      audio.playSTierDrop();
-    } else if (currencyDef.points > 0) {
-      audio.playBelowSTierDrop();
-    }
+    // Play tier-specific custom drop sound (S-S++, A+, A-B) at 100% volume
+    audio.playDropForCurrency(currencyDef);
 
     return item;
   }
@@ -1027,19 +1129,12 @@
   }
 
   function handleAstrolabeClick() {
-    triggerAstrolabePulse();
-    if (!state.running) {
-      startMapRun();
+    // Astrolabe is ONLY clickable while the Map Device is idle (not during an active map run)
+    if (state.running) {
       return;
     }
-    const { cx, cy } = getAstrolabeCenterAndRadius();
-    spawnMonsterBurst({
-      x: cx,
-      y: cy,
-      count: 4,
-      guaranteeHigh: true
-    });
-    setFeed('Astrolabe pulsed — currency dropped around the Atlas!');
+    triggerAstrolabePulse();
+    startMapRun();
   }
 
   canvas.addEventListener('pointermove', (ev) => {
@@ -1076,7 +1171,7 @@
       }
     }
 
-    if (!interactive && isPointInsideAstrolabe(x, y)) {
+    if (!interactive && !state.running && isPointInsideAstrolabe(x, y)) {
       interactive = true;
     }
 
@@ -1143,8 +1238,8 @@
       }
     }
 
-    // 3. Central Astrolabe click: start idle map or pulse currency burst during active run
-    if (isPointInsideAstrolabe(x, y)) {
+    // 3. Central Astrolabe click: start map ONLY when idle (non-clickable while playing)
+    if (!state.running && isPointInsideAstrolabe(x, y)) {
       handleAstrolabeClick();
     }
   });
@@ -1194,7 +1289,11 @@
 
     summaryModal.classList.add('hidden');
     if (helpModal) helpModal.classList.add('hidden');
-    if (astrolabeStage) astrolabeStage.classList.add('is-active-map');
+    if (astrolabeStage) {
+      astrolabeStage.classList.add('is-active-map');
+      astrolabeStage.setAttribute('aria-disabled', 'true');
+      astrolabeStage.tabIndex = -1;
+    }
     if (btnStartMap) btnStartMap.classList.add('is-running');
     triggerAstrolabePulse();
 
@@ -1218,7 +1317,11 @@
   function finishMapRun(reasonText) {
     state.running = false;
     clearAllGroundItems();
-    if (astrolabeStage) astrolabeStage.classList.remove('is-active-map');
+    if (astrolabeStage) {
+      astrolabeStage.classList.remove('is-active-map');
+      astrolabeStage.setAttribute('aria-disabled', 'false');
+      astrolabeStage.tabIndex = 0;
+    }
     if (btnStartMap) btnStartMap.classList.remove('is-running');
     setFeed(reasonText || 'T16 Delirium Map Complete! All 60 seconds survived.');
     openSummaryModal(reasonText || 'T16 Delirium Map Complete');
@@ -1290,27 +1393,25 @@
     modalStrikes.textContent = `${remainingIntegrity} / ${MAX_CLUTTER_STRIKES}`;
     modalAccuracy.textContent = `${acc}%`;
 
-    const cols = modalAssets.rowLayout || [
-      { left: 0.9, width: 6.1 },   // Socket
-      { left: 7.4, width: 24.4 },  // Currency Item
-      { left: 32.2, width: 8.7 },  // Tier
-      { left: 41.3, width: 11.7 }, // Base Pts
-      { left: 53.5, width: 12.1 }, // Clicked
-      { left: 66.0, width: 12.1 }, // Missed
-      { left: 78.6, width: 20.6 }  // Net Points
+    const layout = modalAssets.rowLayout || [
+      { left: 0.7, width: 4.5 },
+      { left: 6.0, width: 26.4 },
+      { left: 32.4, width: 9.8 },
+      { left: 42.2, width: 13.4 },
+      { left: 55.6, width: 13.4 },
+      { left: 69.0, width: 13.4 },
+      { left: 82.4, width: 16.2 }
     ];
+    const rowBgStyle = modalAssets.rowBgUrl
+      ? `background-image:url('${modalAssets.rowBgUrl}')`
+      : '';
 
-    const cellStyle = (idx) => {
-      const c = cols[idx] || cols[0];
-      return `left:${c.left.toFixed(3)}%;width:${c.width.toFixed(3)}%;`;
-    };
-
-    // Populate all 16 currencies ordered from S++ / S+ / S-Tier down to F-Tier
+    // Populate all currencies ordered from S++ / S+ / S-Tier down to F-Tier
     const ordered = [...CURRENCY_TABLE].sort((a, b) => b.points - a.points);
     breakdownTbody.innerHTML = ordered
       .map((c) => {
         const st = state.statsByCurrency[c.id] || { clicked: 0, missed: 0, netPoints: 0 };
-        const baseStr = c.points > 0 ? `+${c.points}` : String(c.points);
+        const baseStr = c.points > 0 ? `+${c.points.toLocaleString()}` : String(c.points);
         const baseClass = c.points > 0 ? 'num-base-pos' : 'num-base-neg';
         const clickedClass = st.clicked > 0 ? 'num-count-active' : 'num-count-zero';
         const missedClass = st.missed > 0 ? 'num-count-active' : 'num-count-zero';
@@ -1321,48 +1422,47 @@
             ? `+${st.netPoints.toLocaleString()}`
             : st.netPoints.toLocaleString();
 
-        const orbUrl = modalAssets.currencyIcons.get(c.id) || '';
-        const orbVariantClass = c.id.startsWith('perfect_')
-          ? 'orb-perfect'
-          : c.id.startsWith('greater_')
-          ? 'orb-greater'
-          : '';
-        const badgeUrl = modalAssets.tierBadges.get(c.tier) || '';
-        const rowBg = modalAssets.rowBgUrl || '';
+        const orbUrl = modalAssets.currencyIcons.get(c.id) || CURRENCY_ICON_PATHS[c.id] || '';
+        const tierBadgeUrl = modalAssets.tierBadges.get(c.tier) || '';
+        const tierTxtClass =
+          c.tier === 'S++'
+            ? 'tier-txt-spp'
+            : c.tier === 'D' || c.tier === 'F'
+            ? 'tier-txt-iron'
+            : '';
+
+        const c0 = layout[0];
+        const c1 = layout[1];
+        const c2 = layout[2];
+        const c3 = layout[3];
+        const c4 = layout[4];
+        const c5 = layout[5];
+        const c6 = layout[6];
 
         return `
-          <div class="ledger-row" role="row" data-currency-id="${c.id}">
-            ${rowBg ? `<img class="ui-slice ledger-row-bg" src="${rowBg}" alt="" aria-hidden="true" />` : '<div class="ledger-row-fallback"></div>'}
-            <div class="ledger-cell row-socket-cell" role="cell" style="${cellStyle(0)}">
-              ${orbUrl ? `<img class="row-orb-icon ${orbVariantClass}" src="${orbUrl}" alt="" />` : ''}
+          <div class="modal-ledger-row" role="row" data-currency-id="${c.id}" style="${rowBgStyle}">
+            <div class="ledger-cell ledger-cell-socket" role="cell" style="left:${c0.left}%;width:${c0.width}%;">
+              ${orbUrl ? `<img class="ledger-orb-img" src="${orbUrl}" alt="${c.name}" />` : ''}
             </div>
-            <div class="ledger-cell row-col-name" role="cell" style="${cellStyle(1)}">
+            <div class="ledger-cell ledger-cell-name" role="cell" style="left:${c1.left}%;width:${c1.width}%;">
               <span class="ledger-currency-name">${c.name}</span>
             </div>
-            <div class="ledger-cell row-col-tier" role="cell" style="${cellStyle(2)}">
-              ${badgeUrl ? `<img class="row-tier-badge" src="${badgeUrl}" alt="${c.tier}" />` : `<span>${c.tier}</span>`}
+            <div class="ledger-cell" role="cell" style="left:${c2.left}%;width:${c2.width}%;">
+              <div class="ledger-tier-shield-wrap" aria-label="Tier ${c.tier}">
+                ${tierBadgeUrl ? `<img class="ledger-tier-shield-img" src="${tierBadgeUrl}" alt="" aria-hidden="true" />` : ''}
+                <span class="ledger-tier-shield-text ${tierTxtClass}">${c.tier}</span>
+              </div>
             </div>
-            <div class="ledger-cell row-col-num ${baseClass}" role="cell" style="${cellStyle(3)}">
-              <span>${baseStr}</span>
-            </div>
-            <div class="ledger-cell row-col-num ${clickedClass}" role="cell" style="${cellStyle(4)}">
-              <span>${st.clicked}</span>
-            </div>
-            <div class="ledger-cell row-col-num ${missedClass}" role="cell" style="${cellStyle(5)}">
-              <span>${st.missed}</span>
-            </div>
-            <div class="ledger-cell row-col-num ${netClass}" role="cell" style="${cellStyle(6)}">
-              <span>${netStr}</span>
-            </div>
+            <div class="ledger-cell ledger-num-cell ${baseClass}" role="cell" style="left:${c3.left}%;width:${c3.width}%;">${baseStr}</div>
+            <div class="ledger-cell ledger-num-cell ${clickedClass}" role="cell" style="left:${c4.left}%;width:${c4.width}%;">${st.clicked}</div>
+            <div class="ledger-cell ledger-num-cell ${missedClass}" role="cell" style="left:${c5.left}%;width:${c5.width}%;">${st.missed}</div>
+            <div class="ledger-cell ledger-num-cell ${netClass}" role="cell" style="left:${c6.left}%;width:${c6.width}%;">${netStr}</div>
           </div>
         `;
       })
       .join('');
 
     summaryModal.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      renderModalFrameCanvas();
-    });
   }
 
   // ---------------------------------------------------------------------------
@@ -1632,48 +1732,159 @@
       ctx.restore();
     }
 
-    // 5. Persistent Vertical FilterBlade Loot Beams (NO icons or orb circles on dropped items)
+    // 5. NeverSink / FilterBlade PlayEffect Light Beams & Minimap Markers (Text + Beams ONLY — no ground orb icons)
+    const fbSpec = window.FilterBladeSpec;
+
+    const drawMinimapStar = (cx, cy, outerR, innerR, color) => {
+      ctx.save();
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const a = -Math.PI / 2 + (i * Math.PI) / 5;
+        const px = cx + Math.cos(a) * r;
+        const py = cy + Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.lineWidth = 1.1;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.stroke();
+      ctx.restore();
+    };
+
     for (const item of state.items) {
       const ax = item.anchorX;
       const ay = item.anchorY;
+      const tierStyle = fbSpec ? fbSpec.getTierStyle(item.currency.cssClass) : null;
+      const beamSpec = fbSpec ? fbSpec.getBeamSpec(item.currency.beam) : null;
+      const isHoverBoost = item.hovered ? 1.25 : 1.0;
 
-      if (item.currency.beam) {
-        const isDivine = item.currency.beam === 'divine' || item.currency.beam === 'mythic';
-        const beamHeight =
-          item.currency.beam === 'mythic' ? 245 : isDivine ? 225 : item.currency.beam === 'gold-tall' ? 160 : 120;
-        const beamWidth = item.currency.beam === 'mythic' ? 20 : isDivine ? 16 : 10;
-        const shimmer = 0.84 + 0.16 * Math.sin(now * 0.012 + item.id);
+      // 5a. Volumetric ground light pool & PlayEffect vertical light beam
+      if (beamSpec) {
+        const [or, og, ob] = beamSpec.outerRgb;
+        const [ir, ig, ib] = beamSpec.innerRgb;
+        const shimmer = (0.86 + 0.14 * Math.sin(now * 0.011 + item.id * 1.7)) * isHoverBoost;
+        const h = beamSpec.height * (item.hovered ? 1.08 : 1);
+
+        // Elliptical ground light pool on the Atlas floor
+        const poolGrad = ctx.createRadialGradient(
+          ax,
+          ay + 2,
+          2,
+          ax,
+          ay + 2,
+          beamSpec.groundRadiusX * (item.hovered ? 1.18 : 1)
+        );
+        poolGrad.addColorStop(0, `rgba(${or}, ${og}, ${ob}, ${Math.min(0.95, 0.72 * shimmer)})`);
+        poolGrad.addColorStop(0.55, `rgba(${or}, ${og}, ${ob}, ${Math.min(0.68, 0.28 * shimmer)})`);
+        poolGrad.addColorStop(1, `rgba(${or}, ${og}, ${ob}, 0)`);
+        ctx.save();
+        ctx.translate(ax, ay + 2);
+        ctx.scale(1, beamSpec.groundRadiusY / beamSpec.groundRadiusX);
+        ctx.fillStyle = poolGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, beamSpec.groundRadiusX * (item.hovered ? 1.18 : 1), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
 
         ctx.save();
-        const beamGrad = ctx.createLinearGradient(ax, ay, ax, ay - beamHeight);
-        if (item.currency.beam === 'mythic') {
-          beamGrad.addColorStop(0, `rgba(255, 32, 32, ${0.98 * shimmer})`);
-          beamGrad.addColorStop(0.5, `rgba(255, 68, 68, ${0.62 * shimmer})`);
-          beamGrad.addColorStop(1, 'rgba(255, 20, 20, 0)');
-        } else if (isDivine) {
-          beamGrad.addColorStop(0, `rgba(255, 28, 28, ${0.95 * shimmer})`);
-          beamGrad.addColorStop(0.55, `rgba(235, 35, 35, ${0.52 * shimmer})`);
-          beamGrad.addColorStop(1, 'rgba(220, 15, 15, 0)');
-        } else if (item.currency.beam === 'gold-tall') {
-          beamGrad.addColorStop(0, `rgba(255, 118, 55, ${0.88 * shimmer})`);
-          beamGrad.addColorStop(0.55, `rgba(244, 96, 74, ${0.44 * shimmer})`);
-          beamGrad.addColorStop(1, 'rgba(244, 96, 74, 0)');
-        } else {
-          beamGrad.addColorStop(0, `rgba(255, 206, 115, ${0.82 * shimmer})`);
-          beamGrad.addColorStop(0.55, `rgba(223, 167, 80, ${0.38 * shimmer})`);
-          beamGrad.addColorStop(1, 'rgba(223, 167, 80, 0)');
-        }
+        ctx.globalCompositeOperation = 'lighter';
 
-        ctx.fillStyle = beamGrad;
-        ctx.fillRect(ax - beamWidth / 2, ay - beamHeight, beamWidth, beamHeight);
+        // Outer soft tapered atmospheric shaft
+        const outerGrad = ctx.createLinearGradient(ax, ay + 2, ax, ay - h);
+        outerGrad.addColorStop(0, `rgba(${or}, ${og}, ${ob}, ${Math.min(0.95, 0.52 * shimmer)})`);
+        outerGrad.addColorStop(0.35, `rgba(${or}, ${og}, ${ob}, ${Math.min(0.75, 0.28 * shimmer)})`);
+        outerGrad.addColorStop(0.78, `rgba(${or}, ${og}, ${ob}, ${Math.min(0.35, 0.08 * shimmer)})`);
+        outerGrad.addColorStop(1, `rgba(${or}, ${og}, ${ob}, 0)`);
+        ctx.fillStyle = outerGrad;
+        ctx.beginPath();
+        ctx.moveTo(ax - beamSpec.outerWidth * 0.54, ay + 2);
+        ctx.lineTo(ax - beamSpec.outerWidth * 0.16, ay - h);
+        ctx.lineTo(ax + beamSpec.outerWidth * 0.16, ay - h);
+        ctx.lineTo(ax + beamSpec.outerWidth * 0.54, ay + 2);
+        ctx.closePath();
+        ctx.fill();
 
-        const coreGrad = ctx.createLinearGradient(ax, ay, ax, ay - beamHeight * 0.92);
-        coreGrad.addColorStop(0, '#ffffff');
-        coreGrad.addColorStop(0.45, isDivine ? '#ff7a7a' : '#fff0c4');
+        // Crisp inner beam pillar
+        const innerGrad = ctx.createLinearGradient(ax, ay + 2, ax, ay - h * 0.94);
+        innerGrad.addColorStop(0, `rgba(${ir}, ${ig}, ${ib}, ${Math.min(1, 0.92 * shimmer)})`);
+        innerGrad.addColorStop(0.45, `rgba(${ir}, ${ig}, ${ib}, ${Math.min(0.88, 0.52 * shimmer)})`);
+        innerGrad.addColorStop(1, `rgba(${ir}, ${ig}, ${ib}, 0)`);
+        ctx.fillStyle = innerGrad;
+        ctx.beginPath();
+        ctx.moveTo(ax - beamSpec.innerWidth * 0.5, ay + 2);
+        ctx.lineTo(ax - beamSpec.innerWidth * 0.2, ay - h * 0.94);
+        ctx.lineTo(ax + beamSpec.innerWidth * 0.2, ay - h * 0.94);
+        ctx.lineTo(ax + beamSpec.innerWidth * 0.5, ay + 2);
+        ctx.closePath();
+        ctx.fill();
+
+        // White-hot central core ray
+        const coreGrad = ctx.createLinearGradient(ax, ay + 2, ax, ay - h * 0.86);
+        coreGrad.addColorStop(0, beamSpec.coreHex);
+        coreGrad.addColorStop(0.4, `rgba(${ir}, ${ig}, ${ib}, ${Math.min(0.95, 0.78 * shimmer)})`);
         coreGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
         ctx.fillStyle = coreGrad;
-        ctx.fillRect(ax - 1.5, ay - beamHeight * 0.92, 3, beamHeight * 0.92);
+        ctx.fillRect(ax - beamSpec.coreWidth / 2, ay - h * 0.86, beamSpec.coreWidth, h * 0.86 + 2);
+
+        // Rising luminous light motes inside S-tier / A+ / A / B beams
+        if (beamSpec.moteCount > 0) {
+          for (let m = 0; m < beamSpec.moteCount; m++) {
+            const phase = (now * 0.00055 + item.id * 0.37 + m / beamSpec.moteCount) % 1;
+            const my = ay - phase * h * 0.86;
+            const mx = ax + Math.sin(phase * 9 + item.id + m * 2.1) * (beamSpec.innerWidth * 0.52);
+            const ma = Math.sin(phase * Math.PI) * 0.88;
+            ctx.fillStyle = `rgba(255, 245, 230, ${ma.toFixed(3)})`;
+            ctx.beginPath();
+            ctx.arc(mx, my, 1.3 + (1 - phase) * 1.15, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
         ctx.restore();
+      }
+
+      // 5b. Subtle tether if anti-overlap pushed the label away from its beam anchor
+      if (item.locked && !state.labelsHidden && beamSpec) {
+        const dx = item.labelX - ax;
+        const dy = item.labelY + (item.height || 28) * 0.5 - ay;
+        if (Math.hypot(dx, dy) > 36) {
+          const [or, og, ob] = beamSpec.outerRgb;
+          ctx.save();
+          ctx.strokeStyle = `rgba(${or}, ${og}, ${ob}, 0.36)`;
+          ctx.lineWidth = 1.15;
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(item.labelX, item.labelY + (item.height || 28) * 0.45);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // 5c. NeverSink Minimap Icon indicator anchored cleanly at the beam base
+      if (beamSpec && tierStyle && tierStyle.minimapIcon && item.locked) {
+        const icon = tierStyle.minimapIcon;
+        const markerY = ay + 6;
+        if (icon.shape === 'star') {
+          drawMinimapStar(ax, markerY, 6.0, 2.6, icon.color);
+        } else {
+          const r = icon.size === 0 ? 4.2 : icon.size === 1 ? 3.6 : 3.0;
+          ctx.save();
+          ctx.fillStyle = icon.color;
+          ctx.shadowColor = icon.color;
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.arc(ax, markerY, r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+          ctx.stroke();
+          ctx.restore();
+        }
       }
     }
 
@@ -1742,6 +1953,9 @@
   }
 
   if (astrolabeStage) {
+    astrolabeStage.addEventListener('click', () => {
+      handleAstrolabeClick();
+    });
     astrolabeStage.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter' || ev.code === 'Space') {
         ev.preventDefault();
@@ -2778,9 +2992,15 @@
           const weight = maskFn(rn);
           if (weight <= 0) continue;
           const off = (y * w + x) * 4;
-          od[off] = Math.round(srcData[off] * weight);
-          od[off + 1] = Math.round(srcData[off + 1] * weight);
-          od[off + 2] = Math.round(srcData[off + 2] * weight);
+          const r = srcData[off];
+          const g = srcData[off + 1];
+          const b = srcData[off + 2];
+          // Suppress faint JPEG black floor noise so mix-blend-mode: screen is 100% seamless
+          if (Math.max(r, g, b) <= 10) continue;
+          const clean = (v) => Math.max(0, Math.round(((v - 6) / 249) * 255 * weight));
+          od[off] = clean(r);
+          od[off + 1] = clean(g);
+          od[off + 2] = clean(b);
           od[off + 3] = 255;
         }
       }
@@ -2795,17 +3015,17 @@
 
     const f = 0.006;
     if (imgAstrolabeOuter) {
-      imgAstrolabeOuter.src = makeLayer((rn) => smoothStep(0.293 - f, 0.293 + f, rn));
+      imgAstrolabeOuter.src = makeLayer((rn) => smoothStep(0.312 - f, 0.312 + f, rn));
     }
     if (imgAstrolabeMid) {
       imgAstrolabeMid.src = makeLayer(
         (rn) =>
-          smoothStep(0.155 - f, 0.155 + f, rn) *
-          (1 - smoothStep(0.298 - f, 0.298 + f, rn))
+          smoothStep(0.146 - f, 0.146 + f, rn) *
+          (1 - smoothStep(0.318 - f, 0.318 + f, rn))
       );
     }
     if (imgAstrolabeCore) {
-      imgAstrolabeCore.src = makeLayer((rn) => 1 - smoothStep(0.16 - f, 0.16 + f, rn));
+      imgAstrolabeCore.src = makeLayer((rn) => 1 - smoothStep(0.152 - f, 0.152 + f, rn));
     }
   }
 
@@ -2853,794 +3073,730 @@
     return trimCanvasByAlpha(raw.canvas, 18);
   }
 
-  function sliceModalStatBar(statBarImg) {
-    const isFgBlack = (r, g, b) => Math.max(r, g, b) > 12;
-    const sheet = imageToCanvas(statBarImg);
+  function buildTieredCurrencyCanvas(baseCanvas, variantTier) {
+    // Only tiered Exalted/Chaos variants share a base sprite in PoE 2; Perfect/Greater Jeweller's Orbs
+    // have their own distinct official PoE2DB icons and return 'base' (never receive a synthetic numeral).
+    if (variantTier !== 'greater' && variantTier !== 'perfect') {
+      return baseCanvas;
+    }
+    const size = Math.max(baseCanvas.width, baseCanvas.height, 96);
+    const out = document.createElement('canvas');
+    out.width = size;
+    out.height = size;
+    const octx = out.getContext('2d');
+    const isPerfect = variantTier === 'perfect';
+
+    // Draw pure, unmodified official PoE2DB orb art cleanly centered
+    const pad = Math.round(size * 0.04);
+    const drawSize = size - pad * 2;
+    octx.drawImage(baseCanvas, pad, pad, drawSize, drawSize);
+
+    // Subtle in-game PoE 2 carved Roman numeral (II = Greater, III = Perfect) without artificial circle badges
+    const glyph = isPerfect ? 'III' : 'II';
+    octx.save();
+    octx.font = `700 ${Math.round(size * 0.25)}px "Fontin SmallCaps", Cinzel, Georgia, serif`;
+    octx.textAlign = 'right';
+    octx.textBaseline = 'bottom';
+    octx.lineWidth = Math.max(3, size * 0.045);
+    octx.strokeStyle = 'rgba(8, 6, 5, 0.96)';
+    octx.lineJoin = 'round';
+    const gx = size - Math.round(size * 0.05);
+    const gy = size - Math.round(size * 0.03);
+    octx.strokeText(glyph, gx, gy);
+    octx.fillStyle = isPerfect ? '#f7d886' : '#e6d6b5';
+    octx.fillText(glyph, gx, gy);
+    octx.restore();
+
+    return out;
+  }
+
+  // 3-slice horizontal parchment scroll keeping sculpted bronze & iron rollers unstretched
+  // while mirror-tiling crisp aged Wraeclast parchment across a sleek ~8.3:1 wide banner
+  function buildWideScrollBannerCanvas(scrollImg) {
+    const isFgBlack = (r, g, b) => Math.max(r, g, b) > 14;
+    const sheet = imageToCanvas(scrollImg);
     const imgData = sheet.ctx.getImageData(0, 0, sheet.width, sheet.height);
     const box = tightTrimBox(imgData, 0, 0, sheet.width - 1, sheet.height - 1, isFgBlack);
-    if (!box) return;
+    if (!box) return null;
 
-    const c = cropCanvasRegion(sheet.canvas, box);
-    clearBlackBackgroundBFS(c, { threshold: 12 });
-    const w = c.width;
-    const h = c.height;
-    const data = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+    const trimmed = cropCanvasRegion(sheet.canvas, box);
+    clearBlackBackgroundBFS(trimmed, {
+      threshold: 14,
+      featherHaloThreshold: 24,
+      unpremultiply: true
+    });
 
-    // Detect the 5 recessed dark interior cell wells below the baked uppercase labels
-    const yBand0 = Math.floor(h * 0.48);
-    const yBand1 = Math.ceil(h * 0.76);
-    const isCellCol = new Uint8Array(w);
-    for (let x = 0; x < w; x++) {
-      let sumLum = 0;
-      let maxLum = 0;
-      let cnt = 0;
-      for (let y = yBand0; y <= yBand1; y++) {
-        const off = (y * w + x) * 4;
-        if (data[off + 3] < 128) continue;
-        const lum = 0.299 * data[off] + 0.587 * data[off + 1] + 0.114 * data[off + 2];
-        sumLum += lum;
-        if (lum > maxLum) maxLum = lum;
-        cnt++;
+    const sw = trimmed.width;
+    const sh = trimmed.height;
+    const dstH = 140;
+    const dstW = 1160;
+    const scaleY = dstH / sh;
+
+    // Keep each hammered-bronze & iron gothic roller cap unstretched (1:1 aspect ratio)
+    const capSrcW = Math.round(sw * 0.148);
+    const capDstW = Math.max(36, Math.round(capSrcW * scaleY));
+
+    const out = document.createElement('canvas');
+    out.width = dstW;
+    out.height = dstH;
+    const octx = out.getContext('2d');
+
+    // Seamlessly tile middle weathered parchment at crisp ~1.28x natural scale with alternating horizontal mirrors
+    const innerPadSrc = Math.round(sw * 0.035);
+    const tileSrcX = capSrcW + innerPadSrc;
+    const tileSrcW = Math.max(120, sw - 2 * (capSrcW + innerPadSrc));
+    const tileDstW = Math.max(160, Math.round(tileSrcW * scaleY * 1.28));
+
+    const midStart = capDstW - 4;
+    const midEnd = dstW - capDstW + 4;
+    const midSpan = midEnd - midStart;
+
+    // Offscreen middle parchment strip so rollers layer crisply over both parchment ends
+    const midCanvas = document.createElement('canvas');
+    midCanvas.width = midSpan;
+    midCanvas.height = dstH;
+    const mctx = midCanvas.getContext('2d');
+
+    const tileCount = Math.ceil(midSpan / (tileDstW - 28)) + 1;
+    const stepX = tileDstW - 28;
+    for (let i = 0; i < tileCount; i++) {
+      const dx = i * stepX;
+      const tileC = document.createElement('canvas');
+      tileC.width = tileDstW;
+      tileC.height = dstH;
+      const tctx = tileC.getContext('2d');
+      tctx.save();
+      if (i % 2 === 1) {
+        tctx.translate(tileDstW, 0);
+        tctx.scale(-1, 1);
       }
-      if (cnt > 0 && sumLum / cnt < 39 && maxLum < 50) {
-        isCellCol[x] = 1;
+      tctx.drawImage(trimmed, tileSrcX, 0, tileSrcW, sh, 0, 0, tileDstW, dstH);
+      tctx.restore();
+
+      // Feather left 28px of subsequent tiles in a single destination-in pass so the entire tile stays visible
+      if (i > 0) {
+        const stopFrac = Math.min(0.45, 28 / tileDstW);
+        const fade = tctx.createLinearGradient(0, 0, tileDstW, 0);
+        fade.addColorStop(0, 'rgba(0,0,0,0)');
+        fade.addColorStop(stopFrac, 'rgba(0,0,0,1)');
+        fade.addColorStop(1, 'rgba(0,0,0,1)');
+        tctx.globalCompositeOperation = 'destination-in';
+        tctx.fillStyle = fade;
+        tctx.fillRect(0, 0, tileDstW, dstH);
+        tctx.globalCompositeOperation = 'source-over';
       }
+      mctx.drawImage(tileC, dx, 0);
     }
 
-    const cellBoxes = [];
-    let inRun = false;
-    let runStart = 0;
-    for (let x = 0; x < w; x++) {
-      if (isCellCol[x] && !inRun) {
-        inRun = true;
-        runStart = x;
-      } else if (!isCellCol[x] && inRun) {
-        inRun = false;
-        if (x - runStart >= w * 0.10) {
-          cellBoxes.push({ x0: runStart, x1: x - 1 });
+    // Subtle warm edge shadow cast by both scroll rollers onto the inner parchment margins
+    const leftGrad = mctx.createLinearGradient(0, 0, 42, 0);
+    leftGrad.addColorStop(0, 'rgba(20, 12, 6, 0.56)');
+    leftGrad.addColorStop(1, 'rgba(20, 12, 6, 0)');
+    mctx.globalCompositeOperation = 'source-atop';
+    mctx.fillStyle = leftGrad;
+    mctx.fillRect(0, 0, 42, dstH);
+
+    const rightGrad = mctx.createLinearGradient(midSpan - 42, 0, midSpan, 0);
+    rightGrad.addColorStop(0, 'rgba(20, 12, 6, 0)');
+    rightGrad.addColorStop(1, 'rgba(20, 12, 6, 0.56)');
+    mctx.fillStyle = rightGrad;
+    mctx.fillRect(midSpan - 42, 0, 42, dstH);
+    mctx.globalCompositeOperation = 'source-over';
+
+    octx.drawImage(midCanvas, midStart, 0);
+
+    // Draw crisp unstretched left & right bronze-and-iron gothic scroll rollers
+    octx.drawImage(trimmed, 0, 0, capSrcW, sh, 0, 0, capDstW, dstH);
+    octx.drawImage(trimmed, sw - capSrcW, 0, capSrcW, sh, dstW - capDstW, 0, capDstW, dstH);
+
+    // Subtle Path of Exile currency scroll crimson details (Scroll of Wisdom nod):
+    // 1. Tiny weathered dark-crimson wax seal with miniature notched ribbon tails on the outer right parchment margin
+    // 2. Tiny braided dark-crimson cord wrap & petite tassel tucked onto the right bronze scroll collar
+    // Both stay strictly outside the centered text safe zone (left 8% .. right 8%) so feed copy never overlaps.
+    octx.save();
+
+    // --- 1. Tiny Crimson Wax Seal (outer right parchment corner, x ≈ 1094, y ≈ 90) ---
+    const sealX = dstW - capDstW - 26;
+    const sealY = Math.round(dstH * 0.64);
+    const sealR = 14.5;
+
+    // Soft cast shadow on weathered parchment
+    octx.save();
+    octx.fillStyle = 'rgba(22, 10, 6, 0.42)';
+    octx.beginPath();
+    octx.ellipse(sealX + 2.5, sealY + 3.5, sealR * 1.06, sealR * 0.94, 0.12, 0, Math.PI * 2);
+    octx.fill();
+    octx.restore();
+
+    // Two miniature notched crimson silk ribbon tails tucked under the wax seal
+    const drawRibbonTail = (angle, len, halfW) => {
+      octx.save();
+      octx.translate(sealX, sealY);
+      octx.rotate(angle);
+      const rGrad = octx.createLinearGradient(0, -halfW, len, halfW);
+      rGrad.addColorStop(0, '#5a0e12');
+      rGrad.addColorStop(0.45, '#8f1b20');
+      rGrad.addColorStop(1, '#631015');
+      octx.fillStyle = rGrad;
+      octx.beginPath();
+      octx.moveTo(0, -halfW * 0.72);
+      octx.lineTo(len, -halfW);
+      octx.lineTo(len - 5.5, 0);
+      octx.lineTo(len, halfW);
+      octx.lineTo(0, halfW * 0.72);
+      octx.closePath();
+      octx.fill();
+      octx.strokeStyle = 'rgba(34, 6, 8, 0.65)';
+      octx.lineWidth = 0.9;
+      octx.stroke();
+      // Faint antique gold thread edge
+      octx.strokeStyle = 'rgba(196, 146, 78, 0.28)';
+      octx.lineWidth = 0.6;
+      octx.beginPath();
+      octx.moveTo(4, -halfW * 0.58);
+      octx.lineTo(len - 2, -halfW * 0.75);
+      octx.stroke();
+      octx.restore();
+    };
+    drawRibbonTail(1.18, 25, 4.4);
+    drawRibbonTail(0.68, 22, 3.9);
+
+    // Organic irregular melted wax body
+    const drawOrganicWaxPath = (ctx, cx, cy, r) => {
+      const lobes = 12;
+      ctx.beginPath();
+      for (let i = 0; i <= lobes; i++) {
+        const a = (i / lobes) * Math.PI * 2;
+        const wobble = 1 + 0.065 * Math.sin(a * 3 + 0.7) + 0.045 * Math.cos(a * 5 - 0.4);
+        const px = cx + Math.cos(a) * r * wobble;
+        const py = cy + Math.sin(a) * r * 0.95 * wobble;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    };
+
+    const waxGrad = octx.createRadialGradient(
+      sealX - sealR * 0.34,
+      sealY - sealR * 0.36,
+      1.5,
+      sealX,
+      sealY,
+      sealR * 1.12
+    );
+    waxGrad.addColorStop(0, '#c6363b');
+    waxGrad.addColorStop(0.42, '#921b20');
+    waxGrad.addColorStop(0.82, '#620f13');
+    waxGrad.addColorStop(1, '#3b070a');
+    drawOrganicWaxPath(octx, sealX, sealY, sealR);
+    octx.fillStyle = waxGrad;
+    octx.fill();
+    octx.strokeStyle = 'rgba(34, 5, 7, 0.78)';
+    octx.lineWidth = 1.1;
+    octx.stroke();
+
+    // Recessed inner stamped ring + subtle Wraeclast diamond-cross sigil
+    octx.beginPath();
+    octx.arc(sealX, sealY, sealR * 0.68, 0, Math.PI * 2);
+    octx.fillStyle = 'rgba(56, 8, 11, 0.46)';
+    octx.fill();
+    octx.strokeStyle = 'rgba(218, 92, 88, 0.42)';
+    octx.lineWidth = 1.1;
+    octx.stroke();
+
+    octx.strokeStyle = 'rgba(222, 138, 114, 0.52)';
+    octx.lineWidth = 1.15;
+    octx.lineCap = 'round';
+    octx.beginPath();
+    octx.moveTo(sealX, sealY - 5.2);
+    octx.lineTo(sealX + 4.2, sealY);
+    octx.lineTo(sealX, sealY + 5.2);
+    octx.lineTo(sealX - 4.2, sealY);
+    octx.closePath();
+    octx.moveTo(sealX, sealY - 6.6);
+    octx.lineTo(sealX, sealY + 6.6);
+    octx.stroke();
+
+    // Tiny upper-left specular wax highlight
+    octx.fillStyle = 'rgba(255, 198, 186, 0.32)';
+    octx.beginPath();
+    octx.ellipse(sealX - 4.6, sealY - 4.8, 3.2, 1.8, -0.6, 0, Math.PI * 2);
+    octx.fill();
+
+    // --- 2. Tiny Braided Crimson Cord Tie on Right Bronze Roller Neck (Scroll of Wisdom motif) ---
+    const cordX = dstW - capDstW + Math.round(capDstW * 0.5);
+    const cordY = Math.round(dstH * 0.225);
+    const cordHalfW = Math.max(9, Math.round(capDstW * 0.36));
+
+    // Crimson cord band wrapped neatly around the upper bronze collar groove
+    const cordGrad = octx.createLinearGradient(cordX - cordHalfW, cordY, cordX + cordHalfW, cordY);
+    cordGrad.addColorStop(0, '#460a0d');
+    cordGrad.addColorStop(0.32, '#9e2126');
+    cordGrad.addColorStop(0.55, '#b82c31');
+    cordGrad.addColorStop(0.82, '#79151a');
+    cordGrad.addColorStop(1, '#3b0709');
+    octx.fillStyle = cordGrad;
+    octx.beginPath();
+    octx.roundRect(cordX - cordHalfW, cordY - 3.2, cordHalfW * 2, 6.4, 3);
+    octx.fill();
+    octx.strokeStyle = 'rgba(28, 5, 7, 0.72)';
+    octx.lineWidth = 0.9;
+    octx.stroke();
+
+    // Subtle diagonal braid ridges along the crimson cord
+    octx.strokeStyle = 'rgba(42, 6, 9, 0.45)';
+    octx.lineWidth = 0.85;
+    for (let bx = -cordHalfW + 3; bx <= cordHalfW - 3; bx += 4.2) {
+      octx.beginPath();
+      octx.moveTo(cordX + bx - 1.5, cordY - 2.6);
+      octx.lineTo(cordX + bx + 1.5, cordY + 2.6);
+      octx.stroke();
+    }
+
+    // Petite crimson cord loop & miniature tassel draping gently onto upper-right parchment edge
+    const knotX = cordX - cordHalfW + 1;
+    const knotY = cordY + 1.5;
+    octx.strokeStyle = '#8b1b20';
+    octx.lineWidth = 2.4;
+    octx.lineCap = 'round';
+    octx.beginPath();
+    octx.moveTo(knotX, knotY);
+    octx.quadraticCurveTo(knotX - 11, knotY + 7, knotX - 9, knotY + 18);
+    octx.stroke();
+    octx.strokeStyle = 'rgba(222, 102, 98, 0.35)';
+    octx.lineWidth = 0.8;
+    octx.stroke();
+
+    // Tiny tassel knot & frayed dark-crimson threads
+    const tx = knotX - 9;
+    const ty = knotY + 18;
+    octx.fillStyle = '#a32328';
+    octx.beginPath();
+    octx.arc(tx, ty, 3.1, 0, Math.PI * 2);
+    octx.fill();
+    octx.strokeStyle = '#3d080a';
+    octx.lineWidth = 0.8;
+    octx.stroke();
+
+    const strands = [
+      [-4.2, 11.5, '#761419'],
+      [-2.1, 13.5, '#9d2228'],
+      [0.2, 14.2, '#b42b31'],
+      [2.4, 13.0, '#85181d'],
+      [4.2, 11.0, '#620f13']
+    ];
+    for (const [dx, dy, col] of strands) {
+      octx.strokeStyle = col;
+      octx.lineWidth = 1.45;
+      octx.beginPath();
+      octx.moveTo(tx + dx * 0.25, ty + 2);
+      octx.quadraticCurveTo(tx + dx * 0.65, ty + dy * 0.55, tx + dx, ty + dy);
+      octx.stroke();
+    }
+
+    octx.restore();
+
+    return out;
+  }
+
+  // High-detail original PoE 2 Post-Map Loot Breakdown Modal slicer
+  function slicePoE2ModalAssets(frameImg, panelsImg, controlsImg) {
+    const isFgBlack = (r, g, b) => Math.max(r, g, b) > 12;
+    const isFgWhite = (r, g, b) => Math.min(r, g, b) < 236 || Math.max(r, g, b) - Math.min(r, g, b) > 16;
+
+    // 1. Winged Forged-Iron Modal Frame (#000000 top exterior above wings)
+    if (frameImg && imgModalFrame) {
+      const sheet = imageToCanvas(frameImg);
+      const sw = sheet.width;
+      const sh = sheet.height;
+
+      // Clear pure black corners above iron wings cleanly (clamped to top 16% so dark interior never leaks)
+      const topStripH = Math.round(sh * 0.16);
+      const topStrip = cropCanvasRegion(sheet.canvas, { x: 0, y: 0, w: sw, h: topStripH });
+      clearBlackBackgroundBFS(topStrip, { threshold: 10, featherHaloThreshold: 18, unpremultiply: true });
+      sheet.ctx.clearRect(0, 0, sw, topStripH);
+      sheet.ctx.drawImage(topStrip, 0, 0);
+
+      // Vertically 3-slice 1376x768 -> 1376x940 keeping winged crest, runes & filigree corners 1:1 unstretched
+      const dstW = sw;
+      const dstH = 940;
+      const topCapH = Math.round(sh * 0.34); // 0..261px (wings, runes, title plaque, top corners)
+      const botCapH = Math.round(sh * 0.17); // bottom filigree corners & riveted rail
+      const midSrcH = sh - topCapH - botCapH;
+      const midDstH = dstH - topCapH - botCapH;
+
+      const composed = document.createElement('canvas');
+      composed.width = dstW;
+      composed.height = dstH;
+      const cctx = composed.getContext('2d', { willReadFrequently: true });
+      cctx.drawImage(sheet.canvas, 0, 0, sw, topCapH, 0, 0, dstW, topCapH);
+      cctx.drawImage(sheet.canvas, 0, topCapH, sw, midSrcH, 0, topCapH, dstW, midDstH);
+      cctx.drawImage(sheet.canvas, 0, sh - botCapH, sw, botCapH, 0, dstH - botCapH, dstW, botCapH);
+
+      // Scan exact dark interior of the sculpted title plaque inside topCapH so heading sits dead-center
+      const fdata = cctx.getImageData(0, 0, dstW, topCapH).data;
+      const xCenter = Math.round(dstW * 0.5);
+      const lumAt = (x, y) => {
+        const off = (y * dstW + x) * 4;
+        return 0.299 * fdata[off] + 0.587 * fdata[off + 1] + 0.114 * fdata[off + 2];
+      };
+
+      // Locate top & bottom metallic bezels of the blank title plaque along centerline (y = 90..180)
+      let pTop = -1;
+      let pBot = -1;
+      for (let y = Math.round(sh * 0.115); y <= Math.round(sh * 0.17); y++) {
+        if (lumAt(xCenter, y) >= 56) {
+          pTop = y + 3;
+          break;
         }
       }
-    }
-    if (inRun && w - runStart >= w * 0.10) {
-      cellBoxes.push({ x0: runStart, x1: w - 1 });
-    }
-
-    let topPct = 42;
-    let heightPct = 36;
-    if (cellBoxes.length === 5) {
-      const sample = cellBoxes[0];
-      const sx0 = Math.floor(sample.x0 + (sample.x1 - sample.x0) * 0.18);
-      const sx1 = Math.ceil(sample.x1 - (sample.x1 - sample.x0) * 0.18);
-
-      let lastHeaderRow = Math.round(h * 0.40);
-      for (let y = Math.floor(h * 0.18); y <= Math.floor(h * 0.48); y++) {
-        for (let x = sx0; x <= sx1; x++) {
-          const off = (y * w + x) * 4;
-          const lum = 0.299 * data[off] + 0.587 * data[off + 1] + 0.114 * data[off + 2];
-          if (lum >= 68) {
-            lastHeaderRow = y;
+      if (pTop !== -1) {
+        for (let y = pTop + 26; y <= Math.round(sh * 0.245); y++) {
+          if (lumAt(xCenter, y) >= 54) {
+            pBot = y - 3;
             break;
           }
         }
       }
-
-      let boxBotY = Math.round(h * 0.80);
-      for (let y = Math.floor(h * 0.56); y <= Math.floor(h * 0.90); y++) {
-        let sum = 0;
-        let cnt = 0;
-        for (let x = sx0; x <= sx1; x++) {
-          const off = (y * w + x) * 4;
-          sum += 0.299 * data[off] + 0.587 * data[off + 1] + 0.114 * data[off + 2];
-          cnt++;
-        }
-        if (cnt > 0 && sum / cnt >= 40) {
-          boxBotY = y - 1;
-          break;
-        }
-      }
-
-      const startY = Math.min(boxBotY - 10, lastHeaderRow + 2);
-      topPct = (startY / h) * 100;
-      heightPct = ((boxBotY - startY) / h) * 100;
-    }
-
-    if (cellBoxes.length === 5) {
-      modalStatCells.forEach((cell, idx) => {
-        if (!cell) return;
-        const b = cellBoxes[idx];
-        cell.style.left = `${(b.x0 / w) * 100}%`;
-        cell.style.width = `${((b.x1 - b.x0 + 1) / w) * 100}%`;
-        cell.style.top = `${topPct}%`;
-        cell.style.height = `${heightPct}%`;
-      });
-    } else {
-      const intLeft = Math.round(w * 0.036);
-      const cellW = (w * 0.928) / 5;
-      modalStatCells.forEach((cell, idx) => {
-        if (!cell) return;
-        cell.style.left = `${((intLeft + cellW * idx) / w) * 100}%`;
-        cell.style.width = `${(cellW / w) * 100}%`;
-        cell.style.top = '42%';
-        cell.style.height = '36%';
-      });
-    }
-
-    if (imgModalStatBar) {
-      imgModalStatBar.src = c.toDataURL('image/png');
-    }
-  }
-
-  function sliceModalLedger(ledgerImg) {
-    const isFgBlack = (r, g, b) => Math.max(r, g, b) > 12;
-    const sheet = imageToCanvas(ledgerImg);
-    const imgData = sheet.ctx.getImageData(0, 0, sheet.width, sheet.height);
-    const bands = findBandsY(imgData, sheet.height, isFgBlack, 18, 6);
-    if (bands.length < 2) return;
-
-    const hdrBox = tightTrimBox(imgData, 0, bands[0].y0, sheet.width - 1, bands[0].y1, isFgBlack);
-    const rowBox = tightTrimBox(imgData, 0, bands[1].y0, sheet.width - 1, bands[1].y1, isFgBlack);
-    if (!hdrBox || !rowBox) return;
-
-    const hdrCanvas = cropCanvasRegion(sheet.canvas, hdrBox);
-    clearBlackBackgroundBFS(hdrCanvas, { threshold: 10 });
-
-    const rowCanvas = cropCanvasRegion(sheet.canvas, rowBox);
-    clearBlackBackgroundBFS(rowCanvas, { threshold: 10 });
-
-    // Scan Repeatable Row Template for exact 7 cell X intervals: [Socket, Name, Tier, BasePts, Clicked, Missed, NetPoints]
-    const rw = rowCanvas.width;
-    const rh = rowCanvas.height;
-    const rdata = rowCanvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, rw, rh).data;
-    const y0 = Math.floor(rh * 0.25);
-    const y1 = Math.ceil(rh * 0.75);
-    const isWellCol = new Uint8Array(rw);
-
-    for (let x = 0; x < rw; x++) {
-      let sumLum = 0;
-      let cnt = 0;
-      for (let y = y0; y <= y1; y++) {
-        const off = (y * rw + x) * 4;
-        if (rdata[off + 3] < 128) continue;
-        sumLum += 0.299 * rdata[off] + 0.587 * rdata[off + 1] + 0.114 * rdata[off + 2];
-        cnt++;
-      }
-      if (cnt > 0 && sumLum / cnt < 34) {
-        isWellCol[x] = 1;
-      }
-    }
-
-    const wells = [];
-    let inRun = false;
-    let rStart = 0;
-    const minColW = Math.max(18, Math.round(rw * 0.025));
-    for (let x = 0; x < rw; x++) {
-      if (isWellCol[x] && !inRun) {
-        inRun = true;
-        rStart = x;
-      } else if (!isWellCol[x] && inRun) {
-        inRun = false;
-        if (x - rStart >= minColW) wells.push({ x0: rStart, x1: x - 1 });
-      }
-    }
-    if (inRun && rw - rStart >= minColW) {
-      wells.push({ x0: rStart, x1: rw - 1 });
-    }
-
-    if (wells.length === 7) {
-      modalAssets.rowLayout = wells.map((b) => ({
-        left: (b.x0 / rw) * 100,
-        width: ((b.x1 - b.x0 + 1) / rw) * 100
-      }));
-    } else {
-      modalAssets.rowLayout = [
-        { left: 1.0, width: 6.0 },
-        { left: 7.6, width: 24.4 },
-        { left: 32.4, width: 8.6 },
-        { left: 41.5, width: 11.7 },
-        { left: 53.7, width: 12.1 },
-        { left: 66.2, width: 12.1 },
-        { left: 78.8, width: 20.4 }
-      ];
-    }
-
-    modalAssets.rowBgUrl = rowCanvas.toDataURL('image/png');
-
-    // Crop out any blank bottom preview spacer underneath the header title pills
-    const hw = hdrCanvas.width;
-    const hh = hdrCanvas.height;
-    const hctx = hdrCanvas.getContext('2d', { willReadFrequently: true });
-    const hdata = hctx.getImageData(0, 0, hw, hh).data;
-    const col1Layout = modalAssets.rowLayout[1];
-    const c1x0 = Math.round(hw * ((col1Layout.left + 2) / 100));
-    const c1x1 = Math.round(hw * ((col1Layout.left + col1Layout.width - 2) / 100));
-
-    let cleanCropH = hh;
-    for (let y = Math.floor(hh * 0.42); y < Math.floor(hh * 0.85); y++) {
-      let sum = 0;
-      let maxL = 0;
-      let cnt = 0;
-      for (let x = c1x0; x <= c1x1; x++) {
-        const off = (y * hw + x) * 4;
-        const lum = 0.299 * hdata[off] + 0.587 * hdata[off + 1] + 0.114 * hdata[off + 2];
-        sum += lum;
-        if (lum > maxL) maxL = lum;
-        cnt++;
-      }
-      if (cnt > 0 && sum / cnt < 22 && maxL < 30) {
-        cleanCropH = Math.max(Math.round(hh * 0.48), y);
-        break;
-      }
-    }
-
-    let finalHdr = hdrCanvas;
-    if (cleanCropH < hh - 4) {
-      finalHdr = cropCanvasRegion(hdrCanvas, { x: 0, y: 0, w: hw, h: cleanCropH });
-      // Copy bottom metallic 3px rim from original hdrCanvas bottom across cleanly so bottom border is sealed
-      const fctx = finalHdr.getContext('2d');
-      fctx.drawImage(hdrCanvas, 0, hh - 3, hw, 3, 0, cleanCropH - 3, hw, 3);
-    }
-
-    if (imgLedgerHeader) {
-      imgLedgerHeader.src = finalHdr.toDataURL('image/png');
-    }
-  }
-
-  function sliceModalBadgesAndButtons(badgesImg) {
-    const isFgBlack = (r, g, b) => Math.max(r, g, b) > 12;
-    const sheet = imageToCanvas(badgesImg);
-    const w = sheet.width;
-    const imgData = sheet.ctx.getImageData(0, 0, w, sheet.height);
-    const sdata = imgData.data;
-    const bands = findBandsY(imgData, sheet.height, isFgBlack, 20, 8);
-    if (bands.length < 2) return;
-
-    // Row 0: 8 Tier Shields (S++, S+, S, A+, A, B, D, F) via minimum column-energy valley splits
-    const b0 = bands[0];
-    const colSum = new Float64Array(w);
-    let rowX0 = w;
-    let rowX1 = 0;
-    for (let x = 0; x < w; x++) {
-      let sum = 0;
-      for (let y = b0.y0; y <= b0.y1; y++) {
-        const off = (y * w + x) * 4;
-        const m = Math.max(sdata[off], sdata[off + 1], sdata[off + 2]);
-        if (m > 12) sum += m;
-      }
-      colSum[x] = sum;
-      if (sum > 80) {
-        if (x < rowX0) rowX0 = x;
-        if (x > rowX1) rowX1 = x;
-      }
-    }
-
-    const tierOrder = ['S++', 'S+', 'S', 'A+', 'A', 'B', 'D', 'F'];
-    const rowSpan = Math.max(200, rowX1 - rowX0 + 1);
-    const slotW = rowSpan / 8;
-    const bounds = [Math.max(0, rowX0 - 4)];
-    for (let k = 1; k < 8; k++) {
-      const approxX = rowX0 + k * slotW;
-      const win0 = Math.max(1, Math.floor(approxX - slotW * 0.28));
-      const win1 = Math.min(w - 2, Math.ceil(approxX + slotW * 0.28));
-      let bestX = Math.round(approxX);
-      let minVal = Infinity;
-      for (let x = win0; x <= win1; x++) {
-        if (colSum[x] < minVal) {
-          minVal = colSum[x];
-          bestX = x;
-        }
-      }
-      bounds.push(bestX);
-    }
-    bounds.push(Math.min(w - 1, rowX1 + 4));
-
-    for (let i = 0; i < 8; i++) {
-      const lx = Math.max(0, bounds[i]);
-      const rx = Math.min(w - 1, bounds[i + 1]);
-      if (rx <= lx + 12) continue;
-      const tight = tightTrimBox(imgData, lx, b0.y0, rx, b0.y1, isFgBlack);
-      if (!tight) continue;
-      const c = cropCanvasRegion(sheet.canvas, tight);
-      clearBlackBackgroundBFS(c, {
-        threshold: 10,
-        featherHaloThreshold: 26,
-        unpremultiply: true
-      });
-      modalAssets.tierBadges.set(tierOrder[i], trimCanvasByAlpha(c, 12).toDataURL('image/png'));
-    }
-
-    // Row 1: Action buttons ("RUN ANOTHER MAP", "CLOSE BREAKDOWN")
-    const b1 = bands[1];
-    const btnIslands = findIslandsX(imgData, b1.y0, b1.y1, isFgBlack, 100, 14);
-    if (btnIslands.length >= 2) {
-      const replayCanvas = cropCanvasRegion(sheet.canvas, btnIslands[0]);
-      clearBlackBackgroundBFS(replayCanvas, { threshold: 10, featherHaloThreshold: 22, unpremultiply: true });
-      const replayTrim = trimCanvasByAlpha(replayCanvas, 12);
-      if (imgBtnReplay) imgBtnReplay.src = replayTrim.toDataURL('image/png');
-
-      const dismissCanvas = cropCanvasRegion(sheet.canvas, btnIslands[1]);
-      clearBlackBackgroundBFS(dismissCanvas, { threshold: 10, featherHaloThreshold: 22, unpremultiply: true });
-      const dismissTrim = trimCanvasByAlpha(dismissCanvas, 12);
-      if (imgBtnDismiss) imgBtnDismiss.src = dismissTrim.toDataURL('image/png');
-    }
-  }
-
-  function prepareModalBackdropParts(backdropImg) {
-    const sheet = imageToCanvas(backdropImg);
-    const w = sheet.width;
-    const h = sheet.height;
-    const sdata = sheet.ctx.getImageData(0, 0, w, h).data;
-
-    // 1. Locate exact inner modal vertical riveted side rails (skipping dim outer vignette margins)
-    const yScan0 = Math.floor(h * 0.25);
-    const yScan1 = Math.ceil(h * 0.65);
-    const colAvgLum = new Float32Array(w);
-    for (let x = 0; x < w; x++) {
-      let sum = 0;
-      let cnt = 0;
-      for (let y = yScan0; y <= yScan1; y++) {
-        const off = (y * w + x) * 4;
-        sum += 0.299 * sdata[off] + 0.587 * sdata[off + 1] + 0.114 * sdata[off + 2];
-        cnt++;
-      }
-      colAvgLum[x] = cnt > 0 ? sum / cnt : 0;
-    }
-
-    let frameX0 = -1;
-    for (let x = Math.floor(w * 0.05); x <= Math.floor(w * 0.35); x++) {
-      if (colAvgLum[x] >= 30) {
-        let edge = x;
-        while (edge > 0 && colAvgLum[edge - 1] >= 16) edge--;
-        frameX0 = edge;
-        break;
-      }
-    }
-    let frameX1 = -1;
-    for (let x = Math.floor(w * 0.95); x >= Math.floor(w * 0.65); x--) {
-      if (colAvgLum[x] >= 30) {
-        let edge = x;
-        while (edge < w - 1 && colAvgLum[edge + 1] >= 16) edge++;
-        frameX1 = edge;
-        break;
-      }
-    }
-    if (frameX0 === -1 || frameX1 <= frameX0 + 160) {
-      frameX0 = Math.round(w * 0.147);
-      frameX1 = Math.round(w * 0.853);
-    }
-    const frameW = frameX1 - frameX0 + 1;
-    const upperH = Math.floor(h * 0.88);
-
-    const bodyCanvas = cropCanvasRegion(sheet.canvas, { x: frameX0, y: 0, w: frameW, h: upperH });
-    const bctx = bodyCanvas.getContext('2d', { willReadFrequently: true });
-
-    // Clear outer top black corners above crest/rails safely (clamped to top 9.5% so interior never leaks)
-    {
-      const topH = Math.floor(h * 0.095);
-      const topCap = cropCanvasRegion(bodyCanvas, { x: 0, y: 0, w: frameW, h: topH });
-      clearBlackBackgroundBFS(topCap, { threshold: 12, featherHaloThreshold: 20 });
-      bctx.clearRect(0, 0, frameW, topH);
-      bctx.drawImage(topCap, 0, 0);
-    }
-
-    const bImgData = bctx.getImageData(0, 0, frameW, upperH);
-    const bdata = bImgData.data;
-
-    // 2. Measure left/right vertical riveted rail thicknesses at y = 0.45h
-    const yMid = Math.floor(upperH * 0.45);
-    let railL = 22;
-    for (let x = 6; x < Math.min(52, Math.floor(frameW * 0.08)); x++) {
-      const off = (yMid * frameW + x) * 4;
-      const lum = 0.299 * bdata[off] + 0.587 * bdata[off + 1] + 0.114 * bdata[off + 2];
-      if (lum < 25) {
-        railL = x + 3;
-        break;
-      }
-    }
-    let railR = 22;
-    for (let dx = 6; dx < Math.min(52, Math.floor(frameW * 0.08)); dx++) {
-      const x = frameW - 1 - dx;
-      const off = (yMid * frameW + x) * 4;
-      const lum = 0.299 * bdata[off] + 0.587 * bdata[off + 1] + 0.114 * bdata[off + 2];
-      if (lum < 25) {
-        railR = dx + 3;
-        break;
-      }
-    }
-
-    // 3. Cleanly erase baked sample subtitle ("Game Over! Collected 3 Minus-Value Clutter Drops...") from interior charcoal
-    const refY = Math.floor(h * 0.185);
-    let refSumLum = 0;
-    let refCnt = 0;
-    for (let x = Math.floor(frameW * 0.25); x < Math.ceil(frameW * 0.75); x++) {
-      const off = (refY * frameW + x) * 4;
-      refSumLum += 0.299 * bdata[off] + 0.587 * bdata[off + 1] + 0.114 * bdata[off + 2];
-      refCnt++;
-    }
-    const refLum = refCnt > 0 ? refSumLum / refCnt : 16;
-
-    let subY0 = upperH;
-    let subY1 = 0;
-    let subX0 = frameW;
-    let subX1 = 0;
-    for (let y = Math.floor(h * 0.090); y <= Math.ceil(h * 0.148); y++) {
-      for (let x = railL + 20; x <= frameW - railR - 20; x++) {
-        const off = (y * frameW + x) * 4;
-        const lum = 0.299 * bdata[off] + 0.587 * bdata[off + 1] + 0.114 * bdata[off + 2];
-        if (lum > refLum + 9 && lum > 27) {
-          if (y < subY0) subY0 = y;
-          if (y > subY1) subY1 = y;
-          if (x < subX0) subX0 = x;
-          if (x > subX1) subX1 = x;
-        }
-      }
-    }
-    if (subY1 >= subY0 && subX1 > subX0) {
-      const sy0 = Math.max(Math.floor(h * 0.088), subY0 - 4);
-      const sy1 = Math.min(refY - 2, subY1 + 5);
-      const sx0 = Math.max(railL + 12, subX0 - 10);
-      const sx1 = Math.min(frameW - railR - 12, subX1 + 10);
-      const ySampleTop = sy0 - 2;
-      const ySampleBot = sy1 + 3;
-
-      for (let y = sy0; y <= sy1; y++) {
-        const t = (y - sy0) / Math.max(1, sy1 - sy0);
-        for (let x = sx0; x <= sx1; x++) {
-          const topOff = (ySampleTop * frameW + x) * 4;
-          const botOff = (ySampleBot * frameW + x) * 4;
-          const topLum = 0.299 * bdata[topOff] + 0.587 * bdata[topOff + 1] + 0.114 * bdata[topOff + 2];
-          const useTop = topLum >= refLum - 4 && topLum <= refLum + 7;
-          const rA = useTop ? bdata[topOff] : bdata[botOff];
-          const gA = useTop ? bdata[topOff + 1] : bdata[botOff + 1];
-          const bA = useTop ? bdata[topOff + 2] : bdata[botOff + 2];
-          const dstOff = (y * frameW + x) * 4;
-          const grain = (((x * 73 + y * 151) % 3) - 1);
-          bdata[dstOff] = Math.max(0, Math.min(255, Math.round(rA * (1 - t) + bdata[botOff] * t + grain)));
-          bdata[dstOff + 1] = Math.max(0, Math.min(255, Math.round(gA * (1 - t) + bdata[botOff + 1] * t + grain)));
-          bdata[dstOff + 2] = Math.max(0, Math.min(255, Math.round(bA * (1 - t) + bdata[botOff + 2] * t + grain)));
-          bdata[dstOff + 3] = 255;
-        }
-      }
-      bctx.putImageData(bImgData, 0, 0);
-    }
-
-    // 4. Detect tight crest span [crestX0 .. crestX1] & top-right [X] close button inside frameW
-    // Scan inside y = 0.042h..0.082h (below flat top rail, where ONLY the arched title banner & corner filigree exist)
-    let crestX0 = Math.round(frameW * 0.22);
-    let crestX1 = Math.round(frameW * 0.78);
-    const yCrest0 = Math.floor(h * 0.042);
-    const yCrest1 = Math.floor(h * 0.082);
-    for (let x = Math.floor(frameW * 0.18); x <= Math.floor(frameW * 0.42); x++) {
-      let brightCnt = 0;
-      for (let y = yCrest0; y <= yCrest1; y++) {
-        const off = (y * frameW + x) * 4;
-        if (bdata[off + 3] > 128) {
-          const lum = 0.299 * bdata[off] + 0.587 * bdata[off + 1] + 0.114 * bdata[off + 2];
-          if (lum >= 45) brightCnt++;
-        }
-      }
-      if (brightCnt >= 4) {
-        crestX0 = x - 8;
-        break;
-      }
-    }
-    for (let x = Math.floor(frameW * 0.82); x >= Math.floor(frameW * 0.58); x--) {
-      let brightCnt = 0;
-      for (let y = yCrest0; y <= yCrest1; y++) {
-        const off = (y * frameW + x) * 4;
-        if (bdata[off + 3] > 128) {
-          const lum = 0.299 * bdata[off] + 0.587 * bdata[off + 1] + 0.114 * bdata[off + 2];
-          if (lum >= 45) brightCnt++;
-        }
-      }
-      if (brightCnt >= 4) {
-        crestX1 = x + 8;
-        break;
-      }
-    }
-    crestX0 = Math.max(Math.round(frameW * 0.18), Math.min(Math.round(frameW * 0.28), crestX0));
-    crestX1 = Math.min(Math.round(frameW * 0.82), Math.max(Math.round(frameW * 0.72), crestX1));
-
-    const topRailH = Math.max(16, Math.round(h * 0.036));
-
-    // Locate [X] square button cleanly inside top-right corner, stopping short of right riveted rail edge
-    let cxMin = frameW;
-    let cxMax = 0;
-    const xCloseScanMin = Math.max(crestX1 + 18, Math.floor(frameW * 0.865));
-    const xCloseScanMax = frameW - Math.max(7, Math.round(railR * 0.65));
-    const yBtnMid0 = Math.max(topRailH + 2, Math.floor(h * 0.038));
-    const yBtnMid1 = Math.floor(h * 0.086);
-    for (let x = xCloseScanMin; x <= xCloseScanMax; x++) {
-      let brightCol = 0;
-      for (let y = yBtnMid0; y <= yBtnMid1; y++) {
-        const off = (y * frameW + x) * 4;
-        if (bdata[off + 3] > 128) {
-          const lum = 0.299 * bdata[off] + 0.587 * bdata[off + 1] + 0.114 * bdata[off + 2];
-          if (lum >= 56) brightCol++;
-        }
-      }
-      if (brightCol >= 3) {
-        if (x < cxMin) cxMin = x;
-        if (x > cxMax) cxMax = x;
-      }
-    }
-    let cyMin = upperH;
-    let cyMax = 0;
-    if (cxMax > cxMin + 12) {
-      const xIn0 = Math.min(cxMax, cxMin + 3);
-      const xIn1 = Math.max(cxMin, cxMax - 3);
-      for (let y = Math.floor(h * 0.014); y <= Math.floor(h * 0.098); y++) {
-        let brightRow = 0;
-        for (let x = xIn0; x <= xIn1; x++) {
-          const off = (y * frameW + x) * 4;
-          if (bdata[off + 3] > 128) {
-            const lum = 0.299 * bdata[off] + 0.587 * bdata[off + 1] + 0.114 * bdata[off + 2];
-            if (lum >= 54) brightRow++;
+      if (pTop !== -1 && pBot > pTop + 24 && modalTitlePlaque) {
+        const pMidY = Math.round((pTop + pBot) * 0.5);
+        let pLeft = Math.round(dstW * 0.368);
+        let pRight = Math.round(dstW * 0.632);
+        for (let x = xCenter; x >= Math.round(dstW * 0.30); x--) {
+          if (lumAt(x, pMidY) >= 54) {
+            pLeft = x + 4;
+            break;
           }
         }
-        if (brightRow >= 4) {
-          if (y < cyMin) cyMin = y;
-          if (y > cyMax) cyMax = y;
+        for (let x = xCenter; x <= Math.round(dstW * 0.70); x++) {
+          if (lumAt(x, pMidY) >= 54) {
+            pRight = x - 4;
+            break;
+          }
+        }
+        modalTitlePlaque.style.left = `${(pLeft / dstW) * 100}%`;
+        modalTitlePlaque.style.width = `${((pRight - pLeft) / dstW) * 100}%`;
+        modalTitlePlaque.style.top = `${(pTop / dstH) * 100}%`;
+        modalTitlePlaque.style.height = `${((pBot - pTop) / dstH) * 100}%`;
+      }
+
+      imgModalFrame.src = composed.toDataURL('image/png');
+    }
+
+    // 2. Riveted 5-Slot Stat Bar + Hammered-Iron Ledger Header + Repeatable Row Plate (#FFFFFF bg!)
+    if (panelsImg) {
+      const sheet = imageToCanvas(panelsImg);
+      const imgData = sheet.ctx.getImageData(0, 0, sheet.width, sheet.height);
+      const bands = findBandsY(imgData, sheet.height, isFgWhite, 24, 12);
+
+      // Band 0: 5-Slot Riveted Forged-Iron Stat Bar
+      if (bands.length >= 1) {
+        const statBox = tightTrimBox(imgData, 0, bands[0].y0, sheet.width - 1, bands[0].y1, isFgWhite);
+        if (statBox) {
+          const rawStat = cropCanvasRegion(sheet.canvas, statBox);
+          clearWhiteBackgroundBFS(rawStat);
+
+          // Compose sleek 1320x164 stat bar keeping top & bottom riveted borders crisp
+          const sw = rawStat.width;
+          const sh = rawStat.height;
+          const statCanvas = document.createElement('canvas');
+          statCanvas.width = 1320;
+          statCanvas.height = 164;
+          const sctx = statCanvas.getContext('2d', { willReadFrequently: true });
+          const rimH = Math.round(sh * 0.24);
+          const dstRimH = Math.round(rimH * (1320 / sw));
+          sctx.drawImage(rawStat, 0, 0, sw, rimH, 0, 0, 1320, dstRimH);
+          sctx.drawImage(
+            rawStat,
+            0,
+            rimH,
+            sw,
+            sh - rimH * 2,
+            0,
+            dstRimH,
+            1320,
+            164 - dstRimH * 2
+          );
+          sctx.drawImage(rawStat, 0, sh - rimH, sw, rimH, 0, 164 - dstRimH, 1320, dstRimH);
+
+          // Pixel-scan exact 5 recessed dark obsidian chambers inside statCanvas
+          const cw = statCanvas.width;
+          const ch = statCanvas.height;
+          const sdata = sctx.getImageData(0, 0, cw, ch).data;
+          const yBand0 = Math.floor(ch * 0.32);
+          const yBand1 = Math.ceil(ch * 0.68);
+          const isChamberCol = new Uint8Array(cw);
+
+          for (let x = 0; x < cw; x++) {
+            let sum = 0;
+            let maxL = 0;
+            let cnt = 0;
+            for (let y = yBand0; y <= yBand1; y++) {
+              const off = (y * cw + x) * 4;
+              if (sdata[off + 3] < 128) continue;
+              const lum = 0.299 * sdata[off] + 0.587 * sdata[off + 1] + 0.114 * sdata[off + 2];
+              sum += lum;
+              if (lum > maxL) maxL = lum;
+              cnt++;
+            }
+            if (cnt > 0 && sum / cnt < 30 && maxL < 42) {
+              isChamberCol[x] = 1;
+            }
+          }
+
+          const chambers = [];
+          let inRun = false;
+          let runStart = 0;
+          for (let x = 0; x < cw; x++) {
+            if (isChamberCol[x] && !inRun) {
+              inRun = true;
+              runStart = x;
+            } else if (!isChamberCol[x] && inRun) {
+              inRun = false;
+              if (x - runStart >= cw * 0.11) chambers.push({ x0: runStart, x1: x - 1 });
+            }
+          }
+          if (inRun && cw - runStart >= cw * 0.11) chambers.push({ x0: runStart, x1: cw - 1 });
+
+          // Scan exact vertical top/bottom dark cavity bounds of chamber 0
+          let chamberTop = Math.round(ch * 0.22);
+          let chamberBot = Math.round(ch * 0.78);
+          if (chambers.length === 5) {
+            const sample = chambers[0];
+            const sx0 = Math.round(sample.x0 + (sample.x1 - sample.x0) * 0.25);
+            const sx1 = Math.round(sample.x1 - (sample.x1 - sample.x0) * 0.25);
+            let bestStart = -1;
+            let bestEnd = -1;
+            let curStart = -1;
+            for (let y = 0; y < ch; y++) {
+              let sum = 0;
+              let cnt = 0;
+              for (let x = sx0; x <= sx1; x++) {
+                const off = (y * cw + x) * 4;
+                sum += 0.299 * sdata[off] + 0.587 * sdata[off + 1] + 0.114 * sdata[off + 2];
+                cnt++;
+              }
+              const dark = cnt > 0 && sum / cnt < 32;
+              if (dark && curStart === -1) curStart = y;
+              else if (!dark && curStart !== -1) {
+                if (y - curStart > bestEnd - bestStart) {
+                  bestStart = curStart;
+                  bestEnd = y - 1;
+                }
+                curStart = -1;
+              }
+            }
+            if (curStart !== -1 && ch - curStart > bestEnd - bestStart) {
+              bestStart = curStart;
+              bestEnd = ch - 1;
+            }
+            if (bestEnd - bestStart >= ch * 0.35) {
+              chamberTop = bestStart;
+              chamberBot = bestEnd;
+            }
+          }
+
+          const topPct = (chamberTop / ch) * 100;
+          const heightPct = ((chamberBot - chamberTop + 1) / ch) * 100;
+          if (chambers.length === 5) {
+            modalStatCells.forEach((cell, idx) => {
+              if (!cell) return;
+              const b = chambers[idx];
+              cell.style.left = `${(b.x0 / cw) * 100}%`;
+              cell.style.width = `${((b.x1 - b.x0 + 1) / cw) * 100}%`;
+              cell.style.top = `${topPct}%`;
+              cell.style.height = `${heightPct}%`;
+            });
+          } else {
+            const intL = 3.2;
+            const slotW = (100 - intL * 2) / 5;
+            modalStatCells.forEach((cell, idx) => {
+              if (!cell) return;
+              cell.style.left = `${intL + idx * slotW}%`;
+              cell.style.width = `${slotW}%`;
+              cell.style.top = '22%';
+              cell.style.height = '56%';
+            });
+          }
+
+          if (imgModalStatBar) imgModalStatBar.src = statCanvas.toDataURL('image/png');
+        }
+      }
+
+      // Band 1: Hammered-Iron Ledger Header Bar
+      if (bands.length >= 2) {
+        const hdrBox = tightTrimBox(imgData, 0, bands[1].y0, sheet.width - 1, bands[1].y1, isFgWhite);
+        if (hdrBox && imgLedgerHeader) {
+          const rawHdr = cropCanvasRegion(sheet.canvas, hdrBox);
+          clearWhiteBackgroundBFS(rawHdr);
+
+          // Compose sleek 1320x66 header bar preserving crisp riveted bronze top/bottom rims
+          const hw = rawHdr.width;
+          const hh = rawHdr.height;
+          const hdrCanvas = document.createElement('canvas');
+          hdrCanvas.width = 1320;
+          hdrCanvas.height = 66;
+          const hctx = hdrCanvas.getContext('2d');
+          const rimSrc = Math.round(hh * 0.25);
+          const rimDst = 16;
+          hctx.drawImage(rawHdr, 0, 0, hw, rimSrc, 0, 0, 1320, rimDst);
+          hctx.drawImage(rawHdr, 0, rimSrc, hw, hh - rimSrc * 2, 0, rimDst, 1320, 66 - rimDst * 2);
+          hctx.drawImage(rawHdr, 0, hh - rimSrc, hw, rimSrc, 0, 66 - rimDst, 1320, rimDst);
+          imgLedgerHeader.src = hdrCanvas.toDataURL('image/png');
+        }
+      }
+
+      // Band 2: Repeatable Ledger Row Plate (keeps left antique-bronze square socket 1:1 square!)
+      if (bands.length >= 3) {
+        const rowBox = tightTrimBox(imgData, 0, bands[2].y0, sheet.width - 1, bands[2].y1, isFgWhite);
+        if (rowBox) {
+          const rawRow = cropCanvasRegion(sheet.canvas, rowBox);
+          clearWhiteBackgroundBFS(rawRow);
+          const rw = rawRow.width;
+          const rh = rawRow.height;
+          const rdata = rawRow.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, rw, rh).data;
+
+          // Detect right edge of the left square bronze socket frame (around x = 8%..13% of rawRow)
+          const midY0 = Math.floor(rh * 0.3);
+          const midY1 = Math.ceil(rh * 0.7);
+          let socketSrcEnd = Math.round(rh * 1.02);
+          for (let x = Math.round(rh * 0.85); x <= Math.min(rw - 20, Math.round(rh * 1.35)); x++) {
+            let sum = 0;
+            let cnt = 0;
+            for (let y = midY0; y <= midY1; y++) {
+              const off = (y * rw + x) * 4;
+              sum += 0.299 * rdata[off] + 0.587 * rdata[off + 1] + 0.114 * rdata[off + 2];
+              cnt++;
+            }
+            if (cnt > 0 && sum / cnt < 22) {
+              socketSrcEnd = x;
+              break;
+            }
+          }
+
+          // Compose sleek 1320x72 row canvas: left bronze socket scaled 1:1 square (72x72),
+          // right obsidian slate + top/bottom forged-iron borders stretched cleanly across 72..1320
+          const outW = 1320;
+          const outH = 72;
+          const socketDstW = Math.max(66, Math.round(socketSrcEnd * (outH / rh)));
+          const rowCanvas = document.createElement('canvas');
+          rowCanvas.width = outW;
+          rowCanvas.height = outH;
+          const rctx = rowCanvas.getContext('2d');
+
+          // Left 1:1 square carved bronze socket
+          rctx.drawImage(rawRow, 0, 0, socketSrcEnd, rh, 0, 0, socketDstW, outH);
+
+          // Right cracked obsidian plate with unstretched crisp top/bottom metal borders
+          const rightSrcX = socketSrcEnd;
+          const rightSrcW = rw - rightSrcX;
+          const rightDstW = outW - socketDstW;
+          const borderSrcH = Math.max(8, Math.round(rh * 0.12));
+          const borderDstH = 8;
+          rctx.drawImage(rawRow, rightSrcX, 0, rightSrcW, borderSrcH, socketDstW, 0, rightDstW, borderDstH);
+          rctx.drawImage(
+            rawRow,
+            rightSrcX,
+            borderSrcH,
+            rightSrcW,
+            rh - borderSrcH * 2,
+            socketDstW,
+            borderDstH,
+            rightDstW,
+            outH - borderDstH * 2
+          );
+          rctx.drawImage(
+            rawRow,
+            rightSrcX,
+            rh - borderSrcH,
+            rightSrcW,
+            borderSrcH,
+            socketDstW,
+            outH - borderDstH,
+            rightDstW,
+            borderDstH
+          );
+
+          modalAssets.rowBgUrl = rowCanvas.toDataURL('image/png');
+
+          // Compute exact 7 column layout percentages shared identically by header & every ledger row
+          const sockPct = (socketDstW / outW) * 100;
+          const contentStart = sockPct + 0.4;
+          const contentEnd = 98.8;
+          const span = contentEnd - contentStart;
+          const ratios = [0.285, 0.105, 0.145, 0.145, 0.145, 0.175];
+
+          const layout = [{ left: 0.35, width: Math.max(4.4, sockPct - 0.7) }];
+          let curLeft = contentStart;
+          for (const ratio of ratios) {
+            const wPct = span * ratio;
+            layout.push({ left: curLeft, width: wPct });
+            curLeft += wPct;
+          }
+          modalAssets.rowLayout = layout;
+
+          // Apply IDENTICAL 7 column coordinates to the hammered-iron header overlay
+          if (modalLedgerHeaderCols) {
+            const hdrCells = modalLedgerHeaderCols.querySelectorAll('.ledger-hdr-cell');
+            hdrCells.forEach((cell, idx) => {
+              const col = layout[idx];
+              if (!col) return;
+              cell.style.left = `${col.left}%`;
+              cell.style.width = `${col.width}%`;
+            });
+          }
         }
       }
     }
-    const closeBox =
-      cxMax > cxMin + 16 && cyMax > cyMin + 16
-        ? { x: cxMin - 1, y: cyMin - 1, w: cxMax - cxMin + 3, h: cyMax - cyMin + 3 }
-        : {
-            x: Math.round(frameW * 0.90),
-            y: Math.round(h * 0.022),
-            w: Math.round(frameW * 0.062),
-            h: Math.round(h * 0.068)
+
+    // 3. Sculpted Gothic Heraldic Shields (4) + Action Buttons & [X] Close Button (#000000 bg)
+    if (controlsImg) {
+      const sheet = imageToCanvas(controlsImg);
+      const imgData = sheet.ctx.getImageData(0, 0, sheet.width, sheet.height);
+      const bands = findBandsY(imgData, sheet.height, isFgBlack, 24, 12);
+
+      // Row 0: 4 sculpted gothic heraldic heater shields
+      if (bands.length >= 1) {
+        const shields = findIslandsX(imgData, bands[0].y0, bands[0].y1, isFgBlack, 80, 12);
+        const shieldUrls = shields.map((box) => {
+          const c = cropCanvasRegion(sheet.canvas, box);
+          clearBlackBackgroundBFS(c, {
+            threshold: 10,
+            featherHaloThreshold: 22,
+            unpremultiply: true
+          });
+          return trimCanvasByAlpha(c, 12).toDataURL('image/png');
+        });
+        if (shieldUrls.length >= 4) {
+          modalAssets.tierBadges.set('S++', shieldUrls[0]);
+          modalAssets.tierBadges.set('S+', shieldUrls[0]);
+          modalAssets.tierBadges.set('S', shieldUrls[1]);
+          modalAssets.tierBadges.set('A+', shieldUrls[1]);
+          modalAssets.tierBadges.set('A', shieldUrls[2]);
+          modalAssets.tierBadges.set('B', shieldUrls[2]);
+          modalAssets.tierBadges.set('D', shieldUrls[3]);
+          modalAssets.tierBadges.set('F', shieldUrls[3]);
+        }
+      }
+
+      // Row 1: Crimson-gold Replay Button, Forged-iron Dismiss Button, and [X] Close Button
+      if (bands.length >= 2) {
+        const btns = findIslandsX(imgData, bands[1].y0, bands[1].y1, isFgBlack, 60, 12);
+        if (btns.length >= 3) {
+          const makeBtnUrl = (box) => {
+            const c = cropCanvasRegion(sheet.canvas, box);
+            clearBlackBackgroundBFS(c, {
+              threshold: 10,
+              featherHaloThreshold: 20,
+              unpremultiply: true
+            });
+            return trimCanvasByAlpha(c, 12).toDataURL('image/png');
           };
-
-    const closeSpriteCanvas = cropCanvasRegion(sheet.canvas, {
-      x: frameX0 + closeBox.x,
-      y: closeBox.y,
-      w: closeBox.w,
-      h: closeBox.h
-    });
-    if (imgModalClose) {
-      imgModalClose.src = closeSpriteCanvas.toDataURL('image/png');
-    }
-
-    // 5. Locate bottom riveted horizontal rail at bottom of original backdrop sheet & build crisp bottom strip
-    let botRailY0 = Math.floor(h * 0.955);
-    for (let y = h - 4; y >= Math.floor(h * 0.88); y--) {
-      let sumLum = 0;
-      let cnt = 0;
-      for (let x = Math.floor(w * 0.35); x <= Math.ceil(w * 0.65); x++) {
-        const off = (y * w + x) * 4;
-        sumLum += 0.299 * sdata[off] + 0.587 * sdata[off + 1] + 0.114 * sdata[off + 2];
-        cnt++;
-      }
-      if (cnt > 0 && sumLum / cnt < 18) {
-        botRailY0 = Math.min(h - 16, y + 1);
-        break;
-      }
-    }
-    const botRailH = Math.max(18, h - botRailY0);
-    const topCornerW = Math.round(railL * 2.55);
-    const topCornerRW = Math.min(Math.round(frameW * 0.09), Math.max(Math.round(railR * 1.9), frameW - closeBox.x + 2));
-    const topCornerH = Math.round(h * 0.128);
-    const crestH = Math.round(h * 0.088);
-
-    // Build clean alpha-feathered top overlays so dark source vignette never forms rectangular blocks over interior charcoal
-    const extractTopOverlay = (sx, sy, sw, sh, solidX0, solidX1, solidY1, maskCloseRect = false) => {
-      const piece = cropCanvasRegion(bodyCanvas, { x: sx, y: sy, w: sw, h: sh });
-      const pctx = piece.getContext('2d', { willReadFrequently: true });
-      const pImg = pctx.getImageData(0, 0, sw, sh);
-      const pdata = pImg.data;
-      for (let y = 0; y < sh; y++) {
-        for (let x = 0; x < sw; x++) {
-          const off = (y * sw + x) * 4;
-          if (pdata[off + 3] === 0) continue;
-          const absX = sx + x;
-          if (
-            maskCloseRect &&
-            absX >= closeBox.x - 2 &&
-            absX <= closeBox.x + closeBox.w + 1 &&
-            y >= Math.max(topRailH, closeBox.y - 1) &&
-            y <= closeBox.y + closeBox.h + 2
-          ) {
-            pdata[off + 3] = 0;
-            continue;
-          }
-          const inRail = absX < solidX0 || absX >= solidX1 || y < solidY1;
-          if (inRail) continue;
-          const lum = 0.299 * pdata[off] + 0.587 * pdata[off + 1] + 0.114 * pdata[off + 2];
-          if (lum <= 18) {
-            pdata[off + 3] = 0;
-          } else if (lum < 32) {
-            const factor = (lum - 18) / 14;
-            pdata[off + 3] = Math.round(pdata[off + 3] * factor);
-          }
+          if (imgBtnReplay) imgBtnReplay.src = makeBtnUrl(btns[0]);
+          if (imgBtnDismiss) imgBtnDismiss.src = makeBtnUrl(btns[1]);
+          if (imgModalClose) imgModalClose.src = makeBtnUrl(btns[2]);
         }
       }
-      pctx.putImageData(pImg, 0, 0);
-      return piece;
-    };
-
-    const topCornerLCanvas = extractTopOverlay(0, 0, topCornerW, topCornerH, railL, frameW, topRailH, false);
-    const topCornerRCanvas = extractTopOverlay(
-      frameW - topCornerRW,
-      0,
-      topCornerRW,
-      topCornerH,
-      0,
-      frameW - railR,
-      topRailH,
-      true
-    );
-    const crestCanvas = extractTopOverlay(crestX0, 0, crestX1 - crestX0, crestH, 0, frameW, topRailH, false);
-
-    const botRailCanvas = document.createElement('canvas');
-    botRailCanvas.width = frameW;
-    botRailCanvas.height = botRailH;
-    const brctx = botRailCanvas.getContext('2d');
-    brctx.drawImage(sheet.canvas, frameX0, botRailY0, frameW, botRailH, 0, 0, frameW, botRailH);
-    const botCornerW = Math.min(topCornerW + 16, Math.round(w * 0.088));
-    const botCornerH = Math.min(botRailH + 26, Math.round(h * 0.085));
-    const cornerL = cropCanvasRegion(sheet.canvas, { x: 0, y: h - botCornerH, w: botCornerW, h: botCornerH });
-    clearBlackBackgroundBFS(cornerL, { threshold: 12 });
-    const cornerR = cropCanvasRegion(sheet.canvas, { x: w - botCornerW, y: h - botCornerH, w: botCornerW, h: botCornerH });
-    clearBlackBackgroundBFS(cornerR, { threshold: 12 });
-
-    modalAssets.backdropParts = {
-      sheetCanvas: sheet.canvas,
-      bodyCanvas,
-      frameX0,
-      frameX1,
-      frameW,
-      upperH,
-      railL,
-      railR,
-      topCornerW,
-      topCornerRW,
-      topCornerH,
-      topCornerLCanvas,
-      topCornerRCanvas,
-      crestCanvas,
-      crestX0,
-      crestX1,
-      crestH,
-      topRailH,
-      botRailCanvas,
-      botRailH,
-      cornerL,
-      cornerR,
-      botCornerW,
-      botCornerH,
-      closeBox
-    };
-  }
-
-  function renderModalFrameCanvas() {
-    const parts = modalAssets.backdropParts;
-    if (!parts || !summaryModalFrame || !modalFrameCanvas) return;
-
-    const tw = summaryModalFrame.clientWidth;
-    const th = summaryModalFrame.clientHeight;
-    if (tw < 200 || th < 200) return;
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    modalFrameCanvas.width = Math.round(tw * dpr);
-    modalFrameCanvas.height = Math.round(th * dpr);
-    const fctx = modalFrameCanvas.getContext('2d');
-    fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    fctx.clearRect(0, 0, tw, th);
-
-    const {
-      bodyCanvas,
-      frameW,
-      upperH,
-      railL,
-      railR,
-      topCornerW,
-      topCornerRW,
-      topCornerH,
-      topCornerLCanvas,
-      topCornerRCanvas,
-      crestCanvas,
-      crestX0,
-      crestX1,
-      crestH,
-      topRailH,
-      botRailCanvas,
-      botRailH,
-      cornerL,
-      cornerR,
-      botCornerW,
-      botCornerH,
-      closeBox
-    } = parts;
-
-    const scale = Math.min(1, tw / frameW, th / 760);
-    const rL = Math.round(railL * scale);
-    const rR = Math.round(railR * scale);
-    const tCW = Math.round(topCornerW * scale);
-    const tCRW = Math.round(topCornerRW * scale);
-    const tCH = Math.round(topCornerH * scale);
-    const cW = Math.round((crestX1 - crestX0) * scale);
-    const cH = Math.round(crestH * scale);
-    const tRH = Math.round(topRailH * scale);
-    const bRH = Math.round(botRailH * scale);
-
-    // 1. Interior charcoal textured gradient
-    const bgGrad = fctx.createRadialGradient(tw * 0.5, th * 0.36, 30, tw * 0.5, th * 0.5, Math.max(tw, th) * 0.65);
-    bgGrad.addColorStop(0, '#18181d');
-    bgGrad.addColorStop(0.65, '#111116');
-    bgGrad.addColorStop(1, '#09090d');
-    fctx.fillStyle = bgGrad;
-    fctx.fillRect(rL * 0.5, tRH * 0.6, tw - (rL + rR) * 0.5, th - tRH * 0.6 - bRH * 0.5);
-
-    // Overlay clean interior texture from original backdrop body (20%..85% Y) subtly
-    fctx.save();
-    fctx.globalAlpha = 0.72;
-    fctx.drawImage(
-      bodyCanvas,
-      railL,
-      Math.round(upperH * 0.2),
-      frameW - railL - railR,
-      Math.round(upperH * 0.65),
-      rL,
-      tRH,
-      tw - rL - rR,
-      th - tRH - bRH
-    );
-    fctx.restore();
-
-    // 2. Left & Right vertical riveted pillars (clean unstretched rail width)
-    const sideSrcY0 = topCornerH;
-    const sideSrcH = Math.max(40, Math.round(upperH * 0.78) - sideSrcY0);
-    const sideDstH = Math.max(20, th - tCH - bRH + 4);
-    fctx.drawImage(bodyCanvas, 0, sideSrcY0, railL, sideSrcH, 0, tCH - 2, rL, sideDstH);
-    fctx.drawImage(bodyCanvas, frameW - railR, sideSrcY0, railR, sideSrcH, tw - rR, tCH - 2, rR, sideDstH);
-
-    // 3. Top horizontal riveted rail segments connecting corners to center crest (using clean rail pattern from left side for both sides)
-    const crestLeftX = Math.round((tw - cW) * 0.5);
-    const crestRightX = crestLeftX + cW;
-    const railSampleX = topCornerW + 6;
-    const railSampleW = Math.max(24, crestX0 - railSampleX - 4);
-    if (crestLeftX > tCW) {
-      fctx.drawImage(bodyCanvas, railSampleX, 0, railSampleW, topRailH, tCW - 2, 0, crestLeftX - tCW + 6, tRH);
-    }
-    const rightRailStart = crestRightX - 4;
-    const rightCornerX = tw - tCRW;
-    if (rightCornerX > rightRailStart) {
-      fctx.drawImage(bodyCanvas, railSampleX, 0, railSampleW, topRailH, rightRailStart, 0, rightCornerX - rightRailStart + 4, tRH);
-    }
-
-    // 4. Top-Left & Top-Right corner filigree + Center "POST-MAP LOOT BREAKDOWN" Crest (feathered inner shadow)
-    fctx.drawImage(topCornerLCanvas, 0, 0, topCornerW, topCornerH, 0, 0, tCW, tCH);
-    fctx.drawImage(topCornerRCanvas, 0, 0, topCornerRW, topCornerH, tw - tCRW, 0, tCRW, tCH);
-    fctx.drawImage(crestCanvas, 0, 0, crestX1 - crestX0, crestH, crestLeftX, 0, cW, cH);
-
-    // 5. Bottom riveted horizontal rail + corner filigree
-    const midBotSrcX = railL + 16;
-    const midBotSrcW = frameW - (railL + railR + 32);
-    fctx.drawImage(botRailCanvas, midBotSrcX, 0, midBotSrcW, botRailH, rL - 2, th - bRH, tw - rL - rR + 4, bRH);
-    const bCW = Math.round(botCornerW * scale);
-    const bCH = Math.round(botCornerH * scale);
-    fctx.drawImage(cornerL, 0, 0, botCornerW, botCornerH, 0, th - bCH, bCW, bCH);
-    fctx.drawImage(cornerR, 0, 0, botCornerW, botCornerH, tw - bCW, th - bCH, bCW, bCH);
-
-    // 6. Position interactive [X] close button sprite right inside its top-right iron frame socket
-    if (btnCloseModal && closeBox) {
-      const rightOffset = (frameW - (closeBox.x + closeBox.w)) * scale;
-      btnCloseModal.style.right = `${Math.max(4, Math.round(rightOffset))}px`;
-      btnCloseModal.style.top = `${Math.max(2, Math.round(closeBox.y * scale))}px`;
-      btnCloseModal.style.width = `${Math.round(closeBox.w * scale)}px`;
-      btnCloseModal.style.height = `${Math.round(closeBox.h * scale)}px`;
-    }
-
-    // 7. Set responsive inner padding vars so stat bar, ledger, and footer sit evenly inside the riveted frame
-    if (summaryModalContent) {
-      const padTop = Math.round(cH * 0.88 + 4);
-      const padX = Math.max(rL + 14, Math.round(tw * 0.036));
-      const padBot = Math.max(bRH + 10, Math.round(th * 0.032));
-      summaryModalContent.style.setProperty('--modal-pad-top', `${padTop}px`);
-      summaryModalContent.style.setProperty('--modal-pad-x', `${padX}px`);
-      summaryModalContent.style.setProperty('--modal-pad-bot', `${padBot}px`);
     }
   }
 
@@ -3654,6 +3810,234 @@
       clearWhiteBackgroundBFS(raw.canvas);
     }
     return trimCanvasByAlpha(raw.canvas, 24);
+  }
+
+  function applyPoE2BottomDockLayout(dockCanvas) {
+    const w = dockCanvas.width;
+    const h = dockCanvas.height;
+    const data = dockCanvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+
+    const avgLumXY = (x0, x1, y0, y1) => {
+      let sum = 0;
+      let cnt = 0;
+      for (let y = Math.max(0, y0); y <= Math.min(h - 1, y1); y++) {
+        for (let x = Math.max(0, x0); x <= Math.min(w - 1, x1); x++) {
+          const off = (y * w + x) * 4;
+          if (data[off + 3] < 128) continue;
+          sum += 0.299 * data[off] + 0.587 * data[off + 1] + 0.114 * data[off + 2];
+          cnt++;
+        }
+      }
+      return cnt > 0 ? sum / cnt : 999;
+    };
+
+    // 1. Locate purple Breach plate, green Abyss plate, and circular gold LED bezel by chromatic signature
+    const scanBox = (pred, xMinRatio, xMaxRatio) => {
+      let minX = w;
+      let maxX = -1;
+      let minY = h;
+      let maxY = -1;
+      const xStart = Math.floor(w * xMinRatio);
+      const xEnd = Math.ceil(w * xMaxRatio);
+      for (let y = Math.floor(h * 0.14); y <= Math.ceil(h * 0.86); y++) {
+        for (let x = xStart; x <= xEnd; x++) {
+          const off = (y * w + x) * 4;
+          if (data[off + 3] < 128) continue;
+          if (pred(data[off], data[off + 1], data[off + 2])) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+      if (maxX - minX < 18 || maxY - minY < 14) return null;
+      return { x0: minX, x1: maxX, y0: minY, y1: maxY };
+    };
+
+    const breachBox = scanBox((r, g, b) => r > g + 10 && b > g + 8 && r > 48 && b > 48, 0.14, 0.42);
+    const abyssBox = scanBox((r, g, b) => g > r + 14 && g > b + 8 && g > 48, 0.42, 0.70);
+    const bezelBox = scanBox((r, g, b) => r - b > 28 && r > 90 && g > 65, 0.80, 0.94);
+
+    if (breachBox && dockBreachLabel) {
+      dockBreachLabel.style.left = `${(breachBox.x0 / w) * 100}%`;
+      dockBreachLabel.style.width = `${((breachBox.x1 - breachBox.x0 + 1) / w) * 100}%`;
+      dockBreachLabel.style.top = `${(breachBox.y0 / h) * 100}%`;
+      dockBreachLabel.style.height = `${((breachBox.y1 - breachBox.y0 + 1) / h) * 100}%`;
+    }
+
+    if (abyssBox && dockAbyssLabel) {
+      dockAbyssLabel.style.left = `${(abyssBox.x0 / w) * 100}%`;
+      dockAbyssLabel.style.width = `${((abyssBox.x1 - abyssBox.x0 + 1) / w) * 100}%`;
+      dockAbyssLabel.style.top = `${(abyssBox.y0 / h) * 100}%`;
+      dockAbyssLabel.style.height = `${((abyssBox.y1 - abyssBox.y0 + 1) / h) * 100}%`;
+    }
+
+    // 2. Pixel-scan the exact recessed dark interior cavity of each filigree square socket
+    //    so both Breach & Abyss icons sit 100% dead-center inside their carved filigree squares
+    const placeSquareSocket = (el, plateBox, fallbackLeftPct) => {
+      if (!el) return;
+      if (!plateBox) {
+        el.style.left = `${fallbackLeftPct}%`;
+        return;
+      }
+
+      const plateH = plateBox.y1 - plateBox.y0 + 1;
+      const midY = Math.round((plateBox.y0 + plateBox.y1) * 0.5);
+      const bandHalfY = Math.max(4, Math.round(plateH * 0.12));
+      const scanLeft = Math.max(0, plateBox.x0 - Math.round(plateH * 1.48));
+      const scanRight = Math.max(scanLeft + 10, plateBox.x0 - 4);
+
+      // Find longest contiguous dark cavity run [wellX0 .. wellX1] to the left of plateBox
+      let bestX0 = -1;
+      let bestX1 = -1;
+      let runX0 = -1;
+      for (let x = scanLeft; x <= scanRight; x++) {
+        const lum = avgLumXY(x, x, midY - bandHalfY, midY + bandHalfY);
+        if (lum < 44) {
+          if (runX0 === -1) runX0 = x;
+        } else if (runX0 !== -1) {
+          if (x - 1 - runX0 > bestX1 - bestX0) {
+            bestX0 = runX0;
+            bestX1 = x - 1;
+          }
+          runX0 = -1;
+        }
+      }
+      if (runX0 !== -1 && scanRight - runX0 > bestX1 - bestX0) {
+        bestX0 = runX0;
+        bestX1 = scanRight;
+      }
+
+      if (bestX1 - bestX0 >= plateH * 0.36) {
+        const cx = (bestX0 + bestX1) * 0.5;
+        const cxInt = Math.round(cx);
+        const bandHalfX = Math.max(4, Math.round((bestX1 - bestX0) * 0.16));
+
+        // Find exact vertical dark cavity run [wellY0 .. wellY1] along socket vertical centerline
+        let bestY0 = plateBox.y0;
+        let bestY1 = plateBox.y1;
+        let runY0 = -1;
+        let maxRunY = 0;
+        for (let y = Math.max(0, plateBox.y0 - 8); y <= Math.min(h - 1, plateBox.y1 + 8); y++) {
+          const lum = avgLumXY(cxInt - bandHalfX, cxInt + bandHalfX, y, y);
+          if (lum < 44) {
+            if (runY0 === -1) runY0 = y;
+          } else if (runY0 !== -1) {
+            if (y - runY0 > maxRunY) {
+              maxRunY = y - runY0;
+              bestY0 = runY0;
+              bestY1 = y - 1;
+            }
+            runY0 = -1;
+          }
+        }
+        if (runY0 !== -1 && Math.min(h - 1, plateBox.y1 + 8) - runY0 + 1 > maxRunY) {
+          bestY0 = runY0;
+          bestY1 = Math.min(h - 1, plateBox.y1 + 8);
+        }
+
+        const cy = (bestY0 + bestY1) * 0.5;
+        const wellSize = Math.min(bestX1 - bestX0 + 1, bestY1 - bestY0 + 1);
+        const slotSize = Math.round(wellSize * 1.04);
+        el.style.left = `${((cx - slotSize * 0.5) / w) * 100}%`;
+        el.style.width = `${(slotSize / w) * 100}%`;
+        el.style.top = `${((cy - slotSize * 0.5) / h) * 100}%`;
+        el.style.height = `${(slotSize / h) * 100}%`;
+      } else {
+        const socketSize = Math.round(plateH * 0.9);
+        const socketRight = plateBox.x0 - Math.round(w * 0.015);
+        const socketLeft = Math.max(0, socketRight - socketSize);
+        const socketTop = Math.round((plateBox.y0 + plateBox.y1 - socketSize) * 0.5);
+        el.style.left = `${(socketLeft / w) * 100}%`;
+        el.style.width = `${(socketSize / w) * 100}%`;
+        el.style.top = `${(socketTop / h) * 100}%`;
+        el.style.height = `${(socketSize / h) * 100}%`;
+      }
+    };
+
+    placeSquareSocket(dockBreachSlot, breachBox, 9.2);
+    placeSquareSocket(dockAbyssSlot, abyssBox, 38.2);
+
+    // 3. Scan BACKWARD (leftward) from inside the smooth dark charcoal interior just left of the gold LED bezel
+    //    until hitting the crisp dark inner groove (lum < 28) or bright raised bevel (lum > 74).
+    //    Scanning outward from the known interior avoids any false triggers on Abyss's right bronze border.
+    if (btnToggleLabels && abyssBox && bezelBox) {
+      const bezelCx = (bezelBox.x0 + bezelBox.x1) * 0.5;
+      const bezelCy = (bezelBox.y0 + bezelBox.y1) * 0.5;
+      const bezelDiam = Math.max(12, bezelBox.x1 - bezelBox.x0 + 1);
+      const bandHalfY = Math.max(5, Math.round((abyssBox.y1 - abyssBox.y0) * 0.14));
+      const midY = Math.round(bezelCy);
+
+      // Start safely inside the flat charcoal surface to the left of the gold ring's outer shadow
+      const scanStartX = Math.max(abyssBox.x1 + 16, bezelBox.x0 - Math.max(10, Math.round(bezelDiam * 0.28)));
+      const scanMinX = abyssBox.x1 + Math.round(w * 0.014);
+
+      let innerRecessLeft = abyssBox.x1 + Math.round(w * 0.044);
+      for (let x = scanStartX; x >= scanMinX; x--) {
+        const lum = avgLumXY(x, x, midY - bandHalfY, midY + bandHalfY);
+        if (lum < 28 || lum > 74) {
+          innerRecessLeft = x + 2;
+          break;
+        }
+      }
+
+      // Scan upward & downward from bezelCy at the horizontal center of the charcoal text area
+      const textMidX = Math.round((innerRecessLeft + bezelBox.x0) * 0.5);
+      const bandHalfX = Math.max(6, Math.round((bezelBox.x0 - innerRecessLeft) * 0.14));
+      let innerRecessTop = abyssBox.y0;
+      let innerRecessBottom = abyssBox.y1;
+      for (let y = midY; y >= Math.max(0, abyssBox.y0 - 12); y--) {
+        const lum = avgLumXY(textMidX - bandHalfX, textMidX + bandHalfX, y, y);
+        if (lum < 28 || lum > 74) {
+          innerRecessTop = y + 2;
+          break;
+        }
+      }
+      for (let y = midY; y <= Math.min(h - 1, abyssBox.y1 + 12); y++) {
+        const lum = avgLumXY(textMidX - bandHalfX, textMidX + bandHalfX, y, y);
+        if (lum < 28 || lum > 74) {
+          innerRecessBottom = y - 2;
+          break;
+        }
+      }
+
+      const toggleLeft = Math.max(abyssBox.x1 + 8, innerRecessLeft - 6);
+      const toggleRight = Math.min(w - 1, bezelBox.x1 + Math.round(w * 0.015));
+      const toggleTop = Math.max(0, innerRecessTop - 4);
+      const toggleBottom = Math.min(h - 1, innerRecessBottom + 4);
+      const toggleH = Math.max(24, toggleBottom - toggleTop + 1);
+      const toggleW = Math.max(40, toggleRight - toggleLeft);
+
+      btnToggleLabels.style.left = `${(toggleLeft / w) * 100}%`;
+      btnToggleLabels.style.width = `${(toggleW / w) * 100}%`;
+      btnToggleLabels.style.top = `${(toggleTop / h) * 100}%`;
+      btnToggleLabels.style.height = `${(toggleH / h) * 100}%`;
+
+      if (dockLabelsText) {
+        const recessCenterY = (innerRecessTop + innerRecessBottom) * 0.5;
+        const interiorSpan = Math.max(24, bezelBox.x0 - innerRecessLeft);
+        const sidePad = Math.max(4, Math.round(interiorSpan * 0.06));
+        const textLeft = innerRecessLeft + sidePad;
+        const textRight = bezelBox.x0 - sidePad;
+        dockLabelsText.style.left = `${((textLeft - toggleLeft) / toggleW) * 100}%`;
+        dockLabelsText.style.width = `${(Math.max(20, textRight - textLeft) / toggleW) * 100}%`;
+        dockLabelsText.style.top = `${((recessCenterY - toggleTop) / toggleH) * 100}%`;
+        dockLabelsText.style.right = 'auto';
+        dockLabelsText.style.bottom = 'auto';
+      }
+
+      if (dockLabelsLed) {
+        const bezelInnerDiam = Math.max(
+          8,
+          Math.min(bezelBox.x1 - bezelBox.x0, bezelBox.y1 - bezelBox.y0) * 0.54
+        );
+        dockLabelsLed.style.left = `${((bezelCx - toggleLeft) / toggleW) * 100}%`;
+        dockLabelsLed.style.top = `${((bezelCy - toggleTop) / toggleH) * 100}%`;
+        dockLabelsLed.style.width = `${(bezelInnerDiam / toggleW) * 100}%`;
+        dockLabelsLed.style.height = `${(bezelInnerDiam / toggleH) * 100}%`;
+      }
+    }
   }
 
   async function loadAndSliceUIAssets() {
@@ -3670,67 +4054,63 @@
         plaqueImg,
         topbarImg,
         scrollDockImg,
+        scrollBannerPoE2Img,
+        bottomDockPoE2Img,
         astrolabeImg,
         divineOrbImg,
         breachIconImg,
         abyssIconImg,
-        modalBackdropImg,
-        modalStatBarImg,
-        modalLedgerImg,
-        modalBadgesImg
+        modalFramePoE2Img,
+        modalPanelsPoE2Img,
+        modalControlsPoE2Img
       ] = await Promise.all([
         loadImageAsset('./assets/ui/plaque_gem_sheet.webp'),
         loadImageAsset('./assets/ui/topbar_stats_sheet.webp'),
         loadImageAsset('./assets/ui/scroll_dock_sheet.jpg?v=13'),
-        loadImageAsset('./assets/ui/astrolabe.webp'),
-        loadImageAsset('./assets/icons/divine_orb.jpg?v=13'),
-        loadImageAsset('./assets/icons/breach.webp?v=13'),
-        loadImageAsset('./assets/icons/abyss.webp?v=13'),
-        loadImageAsset('./assets/ui/modal_backdrop_sheet.webp?v=19'),
-        loadImageAsset('./assets/ui/modal_statbar_sheet.webp?v=19'),
-        loadImageAsset('./assets/ui/modal_ledger_sheet.webp?v=19'),
-        loadImageAsset('./assets/ui/modal_badges_buttons_sheet.webp?v=19'),
+        loadImageAsset('./assets/ui/scroll_banner_poe2.jpg?v=29'),
+        loadImageAsset('./assets/ui/bottom_dock_poe2.jpg?v=28'),
+        loadImageAsset('./assets/ui/astrolabe_poe2.jpg?v=25'),
+        loadImageAsset('./assets/icons/currency/divine_orb.webp?v=27'),
+        loadImageAsset('./assets/icons/breach.webp?v=27'),
+        loadImageAsset('./assets/icons/abyss.webp?v=27'),
+        loadImageAsset('./assets/ui/modal_frame_poe2.jpg?v=29'),
+        loadImageAsset('./assets/ui/modal_panels_poe2.jpg?v=29'),
+        loadImageAsset('./assets/ui/modal_controls_poe2.jpg?v=29'),
         fontReady
       ]);
 
-      // Load & process all custom PoE2 currency orb icons cleanly
+      // Load & process all official PoE2DB currency orb icons cleanly
       const uniqueOrbPaths = [...new Set(Object.values(CURRENCY_ICON_PATHS))];
-      const loadedOrbs = new Map();
+      const loadedOrbCanvases = new Map();
       await Promise.all(
         uniqueOrbPaths.map(async (path) => {
           try {
-            const img = await loadImageAsset(`${path}?v=22`);
+            const img = await loadImageAsset(`${path}?v=27`);
             const processed = processCurrencyIconCanvas(img);
-            loadedOrbs.set(path, processed.toDataURL('image/png'));
+            loadedOrbCanvases.set(path, processed);
           } catch (e) {
             console.warn('Could not load currency orb icon:', path, e);
           }
         })
       );
+      const fbSpecLoader = window.FilterBladeSpec;
       for (const [id, path] of Object.entries(CURRENCY_ICON_PATHS)) {
-        const url = loadedOrbs.get(path);
-        if (url) modalAssets.currencyIcons.set(id, url);
+        const baseCanvas = loadedOrbCanvases.get(path);
+        if (baseCanvas) {
+          const variant = fbSpecLoader ? fbSpecLoader.getCurrencyVariantTier(id) : 'base';
+          const finalCanvas = buildTieredCurrencyCanvas(baseCanvas, variant);
+          currencyCanvasCache.set(id, finalCanvas);
+          modalAssets.currencyIcons.set(id, finalCanvas.toDataURL('image/png'));
+        }
       }
 
-      // Slice Post-Map Loot Breakdown Modal UI sheets
-      prepareModalBackdropParts(modalBackdropImg);
-      sliceModalStatBar(modalStatBarImg);
-      sliceModalLedger(modalLedgerImg);
-      sliceModalBadgesAndButtons(modalBadgesImg);
-
-      // Process standalone Divine Orb top-left brand icon (#000 studio bg removed & tightly trimmed)
+      // Use real official PoE2DB Divine Orb asset next to DIVINE CLICKER brand title
       if (divineOrbImg && imgBrandDivineOrb) {
-        const orbSheet = imageToCanvas(divineOrbImg);
-        clearBlackBackgroundBFS(orbSheet.canvas, {
-          threshold: 16,
-          featherHaloThreshold: 30,
-          unpremultiply: true
-        });
-        const orbTrimmed = trimCanvasByAlpha(orbSheet.canvas, 16);
+        const orbTrimmed = processCurrencyIconCanvas(divineOrbImg);
         imgBrandDivineOrb.src = orbTrimmed.toDataURL('image/png');
       }
 
-      // Process standalone Breach & Abyss icons (dock sockets + map canvas rifts)
+      // Process official PoE2DB Breach & Abyss icons (dock sockets + map canvas rifts)
       if (breachIconImg) {
         const breachTrimmed = processMechanicIconCanvas(breachIconImg);
         mechanicIconCache.set('breach', breachTrimmed);
@@ -3867,7 +4247,31 @@
         }
       }
 
-      // 4. Slice Bottom Parchment Scroll, Riveted Dock & Golden Gauntlet (#FFFFFF bg)
+      // 4. Build Weathered PoE 2 Parchment Scroll Banner + 3-Compartment Forged-Iron Dock (#000000 bg)
+      if (scrollBannerPoE2Img && imgScrollBanner) {
+        const scrollCanvas = buildWideScrollBannerCanvas(scrollBannerPoE2Img);
+        if (scrollCanvas) {
+          imgScrollBanner.src = scrollCanvas.toDataURL('image/png');
+        }
+      }
+
+      if (bottomDockPoE2Img) {
+        const sheet = imageToCanvas(bottomDockPoE2Img);
+        const imgData = sheet.ctx.getImageData(0, 0, sheet.width, sheet.height);
+        const bands = findBandsY(imgData, sheet.height, isFgBlack, 24, 10);
+
+        if (bands.length >= 2) {
+          const dockBox = tightTrimBox(imgData, 0, bands[1].y0, sheet.width - 1, bands[1].y1, isFgBlack);
+          if (dockBox && imgBottomDock) {
+            const dockCanvas = cropCanvasRegion(sheet.canvas, dockBox);
+            clearBlackBackgroundBFS(dockCanvas, { threshold: 14, featherHaloThreshold: 22 });
+            applyPoE2BottomDockLayout(dockCanvas);
+            imgBottomDock.src = dockCanvas.toDataURL('image/png');
+          }
+        }
+      }
+
+      // 5. Slice Golden Gauntlet for Bottom-Left Ground Loot Counter (#FFFFFF bg)
       {
         const sheet = imageToCanvas(scrollDockImg);
         const maxY = Math.floor(sheet.height * 0.91); // Excludes bottom-right watermark
@@ -3875,21 +4279,7 @@
         const bands = findBandsY(imgData, maxY, isFgWhite, 16, 12);
 
         if (bands.length >= 3) {
-          const scrollBox = tightTrimBox(imgData, 0, bands[0].y0, sheet.width - 1, bands[0].y1, isFgWhite);
-          const dockBox = tightTrimBox(imgData, 0, bands[1].y0, sheet.width - 1, bands[1].y1, isFgWhite);
           const gauntletBox = tightTrimBox(imgData, 0, bands[2].y0, sheet.width - 1, bands[2].y1, isFgWhite);
-
-          if (scrollBox && imgScrollBanner) {
-            const c = cropCanvasRegion(sheet.canvas, scrollBox);
-            clearWhiteBackgroundBFS(c);
-            imgScrollBanner.src = c.toDataURL('image/png');
-          }
-          if (dockBox && imgBottomDock) {
-            const c = cropCanvasRegion(sheet.canvas, dockBox);
-            clearWhiteBackgroundBFS(c);
-            applyDockLayoutFromPixels(c);
-            imgBottomDock.src = c.toDataURL('image/png');
-          }
           if (gauntletBox && imgGauntlet) {
             const c = cropCanvasRegion(sheet.canvas, gauntletBox);
             clearWhiteBackgroundBFS(c);
@@ -3897,18 +4287,15 @@
           }
         }
       }
+
+      // 6. Slice High-Detail Original PoE 2 Winged-Crest Post-Map Loot Breakdown Modal Sheets
+      slicePoE2ModalAssets(modalFramePoE2Img, modalPanelsPoE2Img, modalControlsPoE2Img);
     } catch (err) {
       console.error('Failed to process UI sprite sheets:', err);
     } finally {
       document.body.classList.remove('assets-loading');
     }
   }
-
-  window.addEventListener('resize', () => {
-    if (summaryModal && !summaryModal.classList.contains('hidden')) {
-      renderModalFrameCanvas();
-    }
-  });
 
   window.addEventListener('keydown', (ev) => {
     if (ev.key === 'Escape') {
@@ -3923,6 +4310,7 @@
   // Expose helper API on window for debugging & automated verification
   window.DivineClicker = {
     state,
+    audio,
     startMapRun,
     setMapMode,
     handleAstrolabeClick,
@@ -3937,7 +4325,12 @@
 
   // Initialize
   initAssetHotSwap();
-  loadAndSliceUIAssets();
+  loadAndSliceUIAssets().then(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('autostart') === '1' && !state.running) {
+      startMapRun();
+    }
+  });
   resizeCanvas();
   initFogWisps();
   syncMuteUI();
