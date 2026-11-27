@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=30" />
+  <link rel="stylesheet" href="./style.css?v=35" />
 </head>
 <body class="assets-loading">
   <div id="app-container">
@@ -94,8 +94,18 @@
 
     <!-- PLAYFIELD: ASTROLABE + 60FPS CANVAS + DOM LOOT OVERLAY -->
     <main id="playfield">
+      <!-- Hidden SVG turbulence filter for subtle Astrolabe heat/electrical distortion at higher streaks -->
+      <svg class="vfx-svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="astrolabe-distortion-filter" x="-18%" y="-18%" width="136%" height="136%" color-interpolation-filters="sRGB">
+            <feTurbulence id="astrolabe-turbulence" type="fractalNoise" baseFrequency="0.016 0.022" numOctaves="2" seed="7" result="noise" />
+            <feDisplacementMap id="astrolabe-displacement" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+
       <!-- Central Runic Astrolabe (clickable only while Map Device is idle) -->
-      <div id="astrolabe-stage" class="astrolabe-stage" role="button" tabindex="0" aria-label="Map Device Astrolabe — Click to activate map">
+      <div id="astrolabe-stage" class="astrolabe-stage" role="button" tabindex="0" aria-label="Map Device Astrolabe — Click to activate map" data-streak-tier="1" data-charge="0.00">
         <img id="img-astrolabe-outer" class="astrolabe-layer astrolabe-outer" alt="" draggable="false" />
         <img id="img-astrolabe-mid" class="astrolabe-layer astrolabe-mid" alt="" draggable="false" />
         <img id="img-astrolabe-core" class="astrolabe-layer astrolabe-core" alt="" draggable="false" />
@@ -115,16 +125,26 @@
 
       <div id="bottom-dock-wrap" class="bottom-dock-wrap" aria-label="Map Mechanics and Label Toggle">
         <img id="img-bottom-dock" class="ui-slice bottom-dock-img" alt="Action Dock" />
-        <!-- Pixel-aligned official PoE2DB Breach & Abyss icons + sculpted nameplate labels -->
+        <!-- Pixel-aligned official PoE2DB Breach & Abyss icons + interactive charge-gauge plates -->
         <div id="dock-breach-slot" class="dock-mechanic-slot dock-breach-slot" aria-hidden="true">
           <img id="img-dock-breach" class="dock-mechanic-icon" src="./assets/icons/breach.webp?v=27" alt="" />
+          <span class="dock-hotkey-badge" aria-hidden="true">1</span>
         </div>
-        <div id="dock-breach-label" class="dock-plate-label dock-breach-label" aria-hidden="true">BREACH</div>
+        <button id="dock-breach-label" class="dock-plate-label dock-plate-btn dock-breach-label" type="button" disabled title="Breach Charge (0%) — Collect currency to fill, click or press [1]/[Q] at 100%" aria-label="Breach Surge [1] — 0% charged" data-charge="0">
+          <span id="dock-breach-fill" class="dock-charge-fill dock-breach-fill" aria-hidden="true"></span>
+          <span class="dock-plate-text">BREACH</span>
+          <span id="dock-breach-pct" class="dock-plate-pct" aria-hidden="true">0%</span>
+        </button>
 
         <div id="dock-abyss-slot" class="dock-mechanic-slot dock-abyss-slot" aria-hidden="true">
           <img id="img-dock-abyss" class="dock-mechanic-icon" src="./assets/icons/abyss.webp?v=27" alt="" />
+          <span class="dock-hotkey-badge" aria-hidden="true">2</span>
         </div>
-        <div id="dock-abyss-label" class="dock-plate-label dock-abyss-label" aria-hidden="true">ABYSS</div>
+        <button id="dock-abyss-label" class="dock-plate-label dock-plate-btn dock-abyss-label" type="button" disabled title="Abyss Charge (0%) — Collect currency to fill, click or press [2]/[E] at 100%" aria-label="Abyss Surge [2] — 0% charged" data-charge="0">
+          <span id="dock-abyss-fill" class="dock-charge-fill dock-abyss-fill" aria-hidden="true"></span>
+          <span class="dock-plate-text">ABYSS</span>
+          <span id="dock-abyss-pct" class="dock-plate-pct" aria-hidden="true">0%</span>
+        </button>
 
         <!-- Interactive LABELS: ON/OFF hitbox aligned over the right forged-iron toggle plate & gold bezel -->
         <button id="btn-toggle-labels" class="dock-labels-hitbox" type="button" aria-pressed="true" title="Toggle Ground Labels (Z)" aria-label="Toggle Ground Loot Labels">
@@ -154,7 +174,30 @@
         </button>
 
         <div id="summary-modal-content" class="summary-modal-content">
-          <p id="modal-subtitle" class="modal-asset-subtitle">T16 Delirium Map Complete</p>
+          <div class="modal-run-strip">
+            <div class="modal-run-meta">
+              <div id="modal-grade-wrap" class="modal-grade-wrap" title="Heraldic Map Run Grade" aria-label="Run Grade F">
+                <img id="modal-grade-shield-img" class="modal-grade-shield-img" alt="" aria-hidden="true" />
+                <span id="modal-grade-shield-text" class="ledger-tier-shield-text modal-grade-shield-text tier-txt-f">F</span>
+              </div>
+              <div class="modal-subtitle-group">
+                <p id="modal-subtitle" class="modal-asset-subtitle">T16 Delirium Map Complete</p>
+                <span id="modal-best-delta" class="modal-best-delta"></span>
+              </div>
+            </div>
+
+            <div class="modal-filter-tabs" role="tablist" aria-label="Filter Currency Breakdown">
+              <button id="btn-filter-all" class="modal-filter-tab active" type="button" role="tab" aria-selected="true" data-filter="all">
+                All <span class="filter-count" id="filter-count-all">21</span>
+              </button>
+              <button id="btn-filter-collected" class="modal-filter-tab" type="button" role="tab" aria-selected="false" data-filter="collected">
+                Collected <span class="filter-count" id="filter-count-collected">0</span>
+              </button>
+              <button id="btn-filter-missed" class="modal-filter-tab" type="button" role="tab" aria-selected="false" data-filter="missed">
+                Missed <span class="filter-count" id="filter-count-missed">0</span>
+              </button>
+            </div>
+          </div>
 
           <div id="modal-stat-bar-wrap" class="modal-stat-bar-wrap" aria-label="Map Run Summary Metrics">
             <img id="img-modal-stat-bar" class="ui-slice modal-stat-bar-img" alt="Run Summary Statistics" />
@@ -248,10 +291,11 @@
           </div>
 
           <div class="help-section">
-            <h3>Breach, Abyss &amp; Controls</h3>
+            <h3>Breach, Abyss, Vaal Altar &amp; Controls</h3>
             <ul>
               <li><strong>Central Astrolabe:</strong> Click while the Map Device is idle to activate your selected map mode.</li>
-              <li><strong>Breach &amp; Abyss Encounters:</strong> Click glowing purple Breach or emerald Abyss icons on the Atlas floor for massive high-tier loot explosions.</li>
+              <li><strong>Breach &amp; Abyss Charge Gauges:</strong> Picking valuable currency charges the <strong>BREACH</strong> and <strong>ABYSS</strong> dock plates to <strong>100%</strong>. Click them (or press <kbd>1</kbd>/<kbd>Q</kbd> for Breach, <kbd>2</kbd>/<kbd>E</kbd> for Abyss) to unleash a high-tier surge on demand.</li>
+              <li><strong>Rare Vaal Altar (50/50):</strong> Click glowing crimson Vaal Altars for a 50/50 gamble — win to drop <strong>half of all valuable currencies you picked up</strong> back onto the ground, or brick to lose 1 Integrity gem.</li>
               <li><strong><kbd>Z</kbd> or Dock Switch:</strong> Toggle FilterBlade ground loot label visibility (<strong>LABELS: ON</strong> / <strong>OFF</strong>).</li>
               <li><strong><kbd>SPACE</kbd>:</strong> Pop an immediate Breach/Abyss pack during a run.</li>
               <li><strong><kbd>M</kbd>:</strong> Mute / unmute tier drop audio (S–S++, A+, and A–B custom drop sounds).</li>
@@ -268,7 +312,7 @@
     </div>
   </div>
 
-  <script src="./filterblade.js?v=30"></script>
-  <script src="./game.js?v=31"></script>
+  <script src="./filterblade.js?v=35"></script>
+  <script src="./game.js?v=35"></script>
 </body>
 </html>

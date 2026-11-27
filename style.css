@@ -456,6 +456,14 @@ body.assets-loading #corner-right {
   background: transparent;
 }
 
+.vfx-svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 /* Central Astrolabe: mix-blend-mode screen removes black & preserves golden nebula */
 .astrolabe-stage {
   position: absolute;
@@ -469,6 +477,8 @@ body.assets-loading #corner-right {
   cursor: pointer;
   outline: none;
   pointer-events: auto;
+  --astrolabe-glow-alpha: 0;
+  --astrolabe-glow-rgb: 255, 168, 64;
   transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease;
 }
 
@@ -481,9 +491,26 @@ body.assets-loading #corner-right {
   pointer-events: none;
 }
 
+.astrolabe-stage.streak-distorting {
+  filter:
+    url(#astrolabe-distortion-filter)
+    brightness(calc(1 + var(--astrolabe-glow-alpha) * 0.28))
+    saturate(calc(1 + var(--astrolabe-glow-alpha) * 0.35))
+    drop-shadow(0 0 calc(10px + var(--astrolabe-glow-alpha) * 24px) rgba(var(--astrolabe-glow-rgb), calc(var(--astrolabe-glow-alpha) * 0.65)));
+}
+
 .astrolabe-stage.astrolabe-pulse {
   transform: translate(-50%, -50%) scale(1.055);
   filter: brightness(1.28) drop-shadow(0 0 22px rgba(255, 215, 130, 0.55));
+}
+
+.astrolabe-stage.streak-distorting.astrolabe-pulse {
+  transform: translate(-50%, -50%) scale(1.06);
+  filter:
+    url(#astrolabe-distortion-filter)
+    brightness(1.36)
+    saturate(1.32)
+    drop-shadow(0 0 28px rgba(var(--astrolabe-glow-rgb), 0.85));
 }
 
 .astrolabe-layer {
@@ -817,20 +844,31 @@ body.labels-hidden #loot-layer .loot-label {
 
 .dock-breach-slot .dock-mechanic-icon {
   filter: drop-shadow(0 0 6px rgba(186, 98, 255, 0.65));
+  transition: filter 0.18s ease, transform 0.18s ease;
 }
 
 .dock-abyss-slot .dock-mechanic-icon {
   filter: drop-shadow(0 0 6px rgba(72, 224, 130, 0.65));
+  transition: filter 0.18s ease, transform 0.18s ease;
 }
 
-/* Sculpted metallic nameplate text overlays over Breach (plum) & Abyss (emerald) hammered iron plates */
+.dock-breach-slot.is-ready .dock-mechanic-icon {
+  filter: drop-shadow(0 0 11px rgba(224, 128, 255, 0.98)) brightness(1.18);
+  transform: scale(1.06);
+}
+
+.dock-abyss-slot.is-ready .dock-mechanic-icon {
+  filter: drop-shadow(0 0 11px rgba(96, 255, 162, 0.98)) brightness(1.18);
+  transform: scale(1.06);
+}
+
+/* Interactive sculpted metallic charge-gauge buttons over Breach (plum) & Abyss (emerald) plates */
 .dock-plate-label {
   position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
-  z-index: 2;
+  z-index: 3;
   top: 23%;
   height: 54%;
   font-family: var(--font-poe);
@@ -843,6 +881,190 @@ body.labels-hidden #loot-layer .loot-label {
     0 1px 4px rgba(0, 0, 0, 0.98),
     0 0 8px rgba(0, 0, 0, 0.75);
   user-select: none;
+}
+
+.dock-plate-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  overflow: hidden;
+  border-radius: 2px;
+  flex-direction: column;
+  gap: 1px;
+  cursor: default;
+  pointer-events: auto;
+  transition: box-shadow 0.16s ease, filter 0.16s ease, transform 0.08s ease;
+}
+
+.dock-plate-btn:disabled {
+  opacity: 1;
+}
+
+.dock-charge-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  pointer-events: none;
+  z-index: 0;
+  transition: width 0.2s ease-out;
+}
+
+.dock-breach-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(138, 42, 204, 0.42) 0%,
+    rgba(196, 78, 255, 0.56) 82%,
+    rgba(242, 178, 255, 0.76) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(246, 206, 255, 0.35);
+}
+
+.dock-abyss-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(26, 140, 74, 0.44) 0%,
+    rgba(56, 212, 122, 0.56) 82%,
+    rgba(164, 255, 202, 0.76) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(202, 255, 224, 0.35);
+}
+
+.dock-plate-text {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+  line-height: 1;
+  transition: font-size 0.14s ease;
+}
+
+.dock-hotkey-badge {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: clamp(13px, 1.05vw, 16px);
+  height: clamp(13px, 1.05vw, 16px);
+  padding: 0 2px;
+  font-family: var(--font-poe);
+  font-variant-numeric: lining-nums;
+  font-weight: 800;
+  font-size: clamp(8px, 0.66vw, 10px);
+  line-height: 1;
+  letter-spacing: 0;
+  color: #f0dfb8;
+  background: linear-gradient(180deg, rgba(28, 24, 30, 0.96) 0%, rgba(10, 9, 13, 0.98) 100%);
+  border: 1px solid rgba(174, 142, 88, 0.78);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 182, 0.2),
+    0 1px 4px rgba(0, 0, 0, 0.98);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.98);
+  pointer-events: none;
+  transition: border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.dock-mechanic-slot.is-ready .dock-hotkey-badge {
+  color: #fff8dc;
+  border-color: rgba(248, 208, 120, 0.98);
+  background: linear-gradient(180deg, rgba(66, 46, 22, 0.98) 0%, rgba(28, 18, 10, 0.98) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.35),
+    0 0 7px rgba(242, 194, 96, 0.65);
+}
+
+.dock-plate-btn.is-charging .dock-plate-text,
+.dock-plate-btn.is-ready .dock-plate-text {
+  font-size: clamp(9.5px, 0.86vw, 12.6px);
+  letter-spacing: 0.1em;
+}
+
+.dock-plate-pct {
+  position: relative;
+  z-index: 2;
+  display: none;
+  font-family: var(--font-poe);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: clamp(7.2px, 0.54vw, 8.6px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: rgba(244, 228, 198, 0.86);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.98);
+  pointer-events: none;
+}
+
+.dock-plate-btn.is-charging .dock-plate-pct,
+.dock-plate-btn.is-ready .dock-plate-pct {
+  display: block;
+}
+
+.dock-plate-btn.is-ready {
+  cursor: pointer;
+}
+
+.dock-plate-btn.is-ready .dock-plate-pct {
+  color: #fff6dc;
+  font-weight: 800;
+}
+
+.dock-breach-label.is-ready {
+  box-shadow:
+    inset 0 0 14px rgba(218, 118, 255, 0.62),
+    0 0 12px rgba(196, 86, 255, 0.52);
+  animation: breachPlatePulse 1.35s ease-in-out infinite;
+}
+
+.dock-abyss-label.is-ready {
+  box-shadow:
+    inset 0 0 14px rgba(84, 240, 152, 0.62),
+    0 0 12px rgba(54, 218, 126, 0.52);
+  animation: abyssPlatePulse 1.35s ease-in-out infinite;
+}
+
+.dock-plate-btn.is-ready:hover {
+  filter: brightness(1.18);
+}
+
+.dock-plate-btn.is-ready:active {
+  transform: scale(0.97);
+}
+
+.dock-plate-btn:focus-visible {
+  outline: 1.5px solid #f0c878;
+  outline-offset: 1px;
+}
+
+@keyframes breachPlatePulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 11px rgba(210, 108, 255, 0.48),
+      0 0 8px rgba(186, 74, 248, 0.38);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 18px rgba(236, 158, 255, 0.8),
+      0 0 16px rgba(214, 104, 255, 0.72);
+  }
+}
+
+@keyframes abyssPlatePulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 11px rgba(72, 224, 138, 0.48),
+      0 0 8px rgba(42, 198, 110, 0.38);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 18px rgba(132, 255, 184, 0.8),
+      0 0 16px rgba(68, 232, 140, 0.72);
+  }
 }
 
 .dock-breach-label {
@@ -1086,18 +1308,163 @@ body.labels-hidden #loot-layer .loot-label {
   gap: clamp(5px, 0.75vh, 9px);
 }
 
+.modal-run-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: clamp(28px, 3.1vh, 34px);
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.modal-run-meta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.modal-grade-wrap {
+  position: relative;
+  width: clamp(28px, 2.7vw, 34px);
+  height: clamp(28px, 2.7vw, 34px);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-grade-shield-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.modal-grade-shield-text {
+  font-size: clamp(8.5px, 0.75vw, 10.5px);
+}
+
+.modal-subtitle-group {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
 .modal-asset-subtitle {
   margin: 0;
-  text-align: center;
+  text-align: left;
   font-family: var(--font-serif);
   font-variant: normal;
   font-weight: 600;
-  font-size: clamp(12.5px, 1.05vw, 15.5px);
-  letter-spacing: 0.025em;
+  font-size: clamp(12px, 1.02vw, 15px);
+  letter-spacing: 0.02em;
   color: #d6cbb7;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.98);
-  flex-shrink: 0;
   line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal-best-delta {
+  font-family: var(--font-poe);
+  font-variant: small-caps;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 700;
+  font-size: clamp(9.5px, 0.8vw, 11.5px);
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 2px;
+  border: 1px solid rgba(132, 118, 96, 0.42);
+  background: rgba(14, 13, 18, 0.86);
+  color: #b4a998;
+  white-space: nowrap;
+}
+
+.modal-best-delta:empty {
+  display: none;
+}
+
+.modal-best-delta.is-record {
+  color: #ffe28a;
+  border-color: rgba(235, 186, 82, 0.76);
+  background: linear-gradient(180deg, rgba(84, 54, 16, 0.78) 0%, rgba(36, 22, 8, 0.9) 100%);
+  box-shadow: 0 0 10px rgba(235, 186, 82, 0.25);
+}
+
+.modal-best-delta.is-behind {
+  color: #b9aca0;
+  border-color: rgba(124, 112, 98, 0.45);
+}
+
+.modal-filter-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.modal-filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: clamp(24px, 2.5vh, 28px);
+  padding: 0 10px;
+  font-family: var(--font-poe);
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: clamp(9.5px, 0.78vw, 11.2px);
+  letter-spacing: 0.06em;
+  color: #b9ae9a;
+  background: linear-gradient(180deg, #27242a 0%, #161419 100%);
+  border: 1px solid #4e463e;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 2px 5px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  white-space: nowrap;
+}
+
+.modal-filter-tab:hover {
+  color: #f0dfbc;
+  border-color: #8c7550;
+}
+
+.modal-filter-tab.active {
+  color: #fff2d4;
+  border-color: #cca258;
+  background: linear-gradient(180deg, #5e221d 0%, #2f1210 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 222, 162, 0.25),
+    0 0 8px rgba(188, 72, 46, 0.35);
+}
+
+.modal-filter-tab .filter-count {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 0.92em;
+  color: #c8b896;
+  opacity: 0.9;
+}
+
+.modal-filter-tab.active .filter-count {
+  color: #ffd98a;
+  opacity: 1;
+}
+
+.modal-ledger-empty {
+  padding: 36px 20px;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 1.2vw, 17px);
+  color: #afa492;
+  background: rgba(12, 11, 15, 0.65);
+  border: 1px solid rgba(114, 102, 84, 0.28);
+  border-radius: 2px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
 }
 
 /* RIVETED FORGED-IRON 5-SLOT STAT BAR */
@@ -1395,12 +1762,48 @@ body.labels-hidden #loot-layer .loot-label {
 }
 
 .ledger-tier-shield-text.tier-txt-spp {
-  font-size: clamp(8.5px, 0.72vw, 10.5px);
-  color: #fff7df;
+  font-size: clamp(8.5px, 0.72vw, 10.2px);
+  color: #b40d15;
+  text-shadow:
+    0 1px 0 rgba(255, 252, 245, 0.72),
+    0 0 4px rgba(255, 255, 255, 0.65);
 }
 
-.ledger-tier-shield-text.tier-txt-iron {
-  color: #dde2e8;
+.ledger-tier-shield-text.tier-txt-sp {
+  color: #fff6dc;
+}
+
+.ledger-tier-shield-text.tier-txt-s {
+  color: #fff4e4;
+}
+
+.ledger-tier-shield-text.tier-txt-ap {
+  color: #f9ecff;
+  text-shadow:
+    0 1px 2px rgba(20, 4, 34, 0.98),
+    0 0 5px rgba(196, 112, 255, 0.52);
+}
+
+.ledger-tier-shield-text.tier-txt-a {
+  color: #fff4dd;
+}
+
+.ledger-tier-shield-text.tier-txt-b {
+  color: #e6fff3;
+  text-shadow:
+    0 1px 2px rgba(4, 24, 18, 0.98),
+    0 0 5px rgba(84, 224, 168, 0.42);
+}
+
+.ledger-tier-shield-text.tier-txt-d {
+  color: #e2effa;
+  text-shadow:
+    0 1px 2px rgba(6, 14, 26, 0.98),
+    0 0 4px rgba(124, 174, 224, 0.36);
+}
+
+.ledger-tier-shield-text.tier-txt-f {
+  color: #a8a29c;
 }
 
 .ledger-num-cell {

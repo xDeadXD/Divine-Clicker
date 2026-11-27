@@ -474,17 +474,23 @@
   const imgBottomDock = document.getElementById('img-bottom-dock');
   const dockBreachSlot = document.getElementById('dock-breach-slot');
   const dockBreachLabel = document.getElementById('dock-breach-label');
+  const dockBreachFill = document.getElementById('dock-breach-fill');
+  const dockBreachPct = document.getElementById('dock-breach-pct');
   const imgDockBreach = document.getElementById('img-dock-breach');
   const dockAbyssSlot = document.getElementById('dock-abyss-slot');
   const dockAbyssLabel = document.getElementById('dock-abyss-label');
+  const dockAbyssFill = document.getElementById('dock-abyss-fill');
+  const dockAbyssPct = document.getElementById('dock-abyss-pct');
   const imgDockAbyss = document.getElementById('img-dock-abyss');
   const imgGauntlet = document.getElementById('img-gauntlet');
 
-  // Central Astrolabe
+  // Central Astrolabe & SVG Heat/Electrical Distortion Filter
   const astrolabeStage = document.getElementById('astrolabe-stage');
   const imgAstrolabeOuter = document.getElementById('img-astrolabe-outer');
   const imgAstrolabeMid = document.getElementById('img-astrolabe-mid');
   const imgAstrolabeCore = document.getElementById('img-astrolabe-core');
+  const astrolabeTurbulence = document.getElementById('astrolabe-turbulence');
+  const astrolabeDisplacement = document.getElementById('astrolabe-displacement');
 
   // Plaque Dynamic Overlays & Gem Sockets
   const plaqueNameplate = document.getElementById('plaque-nameplate');
@@ -538,6 +544,16 @@
   const imgBtnReplay = document.getElementById('img-btn-replay');
   const imgBtnDismiss = document.getElementById('img-btn-dismiss');
   const modalSubtitle = document.getElementById('modal-subtitle');
+  const modalGradeWrap = document.getElementById('modal-grade-wrap');
+  const modalGradeShieldImg = document.getElementById('modal-grade-shield-img');
+  const modalGradeShieldText = document.getElementById('modal-grade-shield-text');
+  const modalBestDelta = document.getElementById('modal-best-delta');
+  const btnFilterAll = document.getElementById('btn-filter-all');
+  const btnFilterCollected = document.getElementById('btn-filter-collected');
+  const btnFilterMissed = document.getElementById('btn-filter-missed');
+  const filterCountAll = document.getElementById('filter-count-all');
+  const filterCountCollected = document.getElementById('filter-count-collected');
+  const filterCountMissed = document.getElementById('filter-count-missed');
   const modalScore = document.getElementById('modal-score');
   const modalHighScore = document.getElementById('modal-highscore');
   const modalMaxStreak = document.getElementById('modal-max-streak');
@@ -596,11 +612,28 @@
 
     score: 0,
     highScore: Number(localStorage.getItem(STORAGE_KEY_HIGHSCORE) || 0),
+    prevHighScore: Number(localStorage.getItem(STORAGE_KEY_HIGHSCORE) || 0),
     streak: 1.0,
     maxStreak: 1.0,
     validClicks: 0,
     clutterClicks: 0,
     breachHandsClasped: 0,
+
+    // Interactive Breach & Abyss dock charge gauges [0 .. 100]
+    breachCharge: 0,
+    abyssCharge: 0,
+
+    // Ordered list of valuable currency IDs collected in current run (for Vaal Altar 50% drop)
+    pickedValuableIds: [],
+
+    // Rare Vaal Altar 50/50 gamble node on canvas
+    vaalAltar: null,
+    nextVaalAltarInMs: 22000,
+    vaalAltarsSpawned: 0,
+    vaalAltarsTriggered: 0,
+
+    // Post-Map Breakdown active filter ('all' | 'collected' | 'missed')
+    breakdownFilter: 'all',
 
     nextItemId: 1,
     items: [], // Active ground/arcing currency drops
@@ -609,6 +642,14 @@
     groundRifts: [],
     breachHands: [],
     fogWisps: [],
+
+    // Astrolabe streak-driven fire & electrical distortion pools
+    astrolabeCharge: 0,
+    astrolabeEmbers: [],
+    astrolabeArcs: [],
+    astrolabeEmberCarry: 0,
+    astrolabeArcCooldownMs: 0,
+    lastDistortionTickMs: 0,
 
     shakeTimeMs: 0,
     shakeMagnitude: 0,
@@ -715,7 +756,46 @@
     };
   }
 
-  function rollCurrency(bonusHighTier = false) {
+  function getCurrentStreakDifficulty(isFinale = false) {
+    const fb = window.FilterBladeSpec;
+    if (fb && typeof fb.getStreakDifficulty === 'function') {
+      return fb.getStreakDifficulty(state.streak, isFinale);
+    }
+    return {
+      streak: state.streak,
+      tier: Math.floor(state.streak),
+      lifetimeMinMs: 1400,
+      lifetimeMaxMs: 1800,
+      burstIntervalMinMs: isFinale ? 400 : 550,
+      burstIntervalMaxMs: isFinale ? 620 : 850,
+      arcDurationMs: 120,
+      extraItems: 0,
+      clutterBias: 0,
+      scatterBonusPx: 0
+    };
+  }
+
+  function getCurrentStreakIntensityProfile(streakVal) {
+    const fb = window.FilterBladeSpec;
+    if (fb && typeof fb.getStreakIntensityProfile === 'function') {
+      return fb.getStreakIntensityProfile(streakVal);
+    }
+    return {
+      streak: 1.0,
+      tier: 1,
+      intensity: 0,
+      distortionScale: 0,
+      turbulenceFreq: 0.014,
+      glowStrength: 0,
+      emberRate: 0,
+      arcChance: 0,
+      maxArcs: 0,
+      spinSpeedMultiplier: 1.0,
+      palette: 'calm'
+    };
+  }
+
+  function rollCurrency(bonusHighTier = false, clutterBias = 0) {
     // Breach & Abyss encounters grant exciting elevated high-tier roll odds while preserving balance
     if (bonusHighTier && Math.random() < 0.68) {
       const highPool = CURRENCY_TABLE.filter((c) => c.points > 0);
@@ -729,6 +809,18 @@
         r -= w;
       }
       return highPool[0];
+    }
+
+    // At higher streak multipliers, inject extra clutter hazards into non-guaranteed slots to test precision
+    if (clutterBias > 0 && Math.random() < clutterBias) {
+      const clutterPool = CURRENCY_TABLE.filter((c) => c.points < 0);
+      const clutterWeight = clutterPool.reduce((sum, c) => sum + c.weight, 0);
+      let cr = Math.random() * clutterWeight;
+      for (const item of clutterPool) {
+        if (cr < item.weight) return item;
+        cr -= item.weight;
+      }
+      return clutterPool[0];
     }
 
     let r = Math.random() * TOTAL_WEIGHT;
@@ -873,10 +965,13 @@
     item.slotReserved = true;
   }
 
-  function spawnCurrencyItem(originX, originY, currencyDef) {
+  function spawnCurrencyItem(originX, originY, currencyDef, extraOptions = {}) {
     const id = state.nextItemId++;
+    const diff = getCurrentStreakDifficulty(
+      state.mode === 'timed' && state.mapDurationMs - state.elapsedMs <= 20000
+    );
     const angle = Math.random() * Math.PI * 2;
-    const dist = 28 + Math.random() * 110;
+    const dist = 28 + Math.random() * (110 + diff.scatterBonusPx);
     const safe = getPlayfieldSafeBounds();
 
     const anchorX = Math.max(
@@ -888,8 +983,12 @@
       Math.min(safe.bottom, originY + Math.sin(angle) * (dist * 0.72))
     );
 
-    // Fast disappear lifetime: 1.4s to 1.8s on the ground
-    const lifetimeMs = 1400 + Math.random() * 400;
+    // Despawn lifetime tightens progressively with every streak multiplier increase (1.45-1.82s at 1.0x -> ~0.78-0.99s at 5.0x)
+    const lifetimeBonusMs = Number(extraOptions.lifetimeBonusMs) || 0;
+    const lifetimeMs =
+      diff.lifetimeMinMs +
+      Math.random() * Math.max(120, diff.lifetimeMaxMs - diff.lifetimeMinMs) +
+      lifetimeBonusMs;
 
     // Create FilterBlade DOM Label — ONLY ITEM NAME APPEARS (zero icons)
     const el = document.createElement('div');
@@ -909,7 +1008,7 @@
       curX: originX,
       curY: originY,
       arcHeight: 38 + Math.random() * 28,
-      arcDurationMs: 120, // Fast 120ms parabolic pop-up animation
+      arcDurationMs: diff.arcDurationMs, // Snappier pop-up arc as streak climbs (120ms -> 84ms)
       ageMs: 0,
       lifetimeMs,
       locked: false,
@@ -978,11 +1077,11 @@
 
     const isDeliriumFinale =
       state.mode === 'timed' && state.mapDurationMs - state.elapsedMs <= 20000;
-    const count =
-      options.count ||
-      (isDeliriumFinale
-        ? 5 + Math.floor(Math.random() * 4)
-        : 4 + Math.floor(Math.random() * 4));
+    const diff = getCurrentStreakDifficulty(isDeliriumFinale);
+    const baseCount = isDeliriumFinale
+      ? 5 + Math.floor(Math.random() * 4)
+      : 4 + Math.floor(Math.random() * 4);
+    const count = options.count || Math.min(11, baseCount + diff.extraItems);
 
     const mechanic = options.mechanic || (options.breach ? 'breach' : Math.random() < 0.5 ? 'breach' : 'abyss');
 
@@ -1018,7 +1117,7 @@
           r -= cand.weight;
         }
       } else {
-        def = rollCurrency(options.breach);
+        def = rollCurrency(options.breach, options.breach ? diff.clutterBias * 0.5 : diff.clutterBias);
       }
       spawnCurrencyItem(centerX, centerY, def);
     }
@@ -1040,6 +1139,206 @@
       ageMs: 0,
       durationMs: 4200
     });
+  }
+
+  function updateMechanicDockUI() {
+    const syncPlate = (mechanic, charge, btnEl, fillEl, pctEl, slotEl, hotkeyHint) => {
+      const clamped = Math.max(0, Math.min(100, Math.round(charge)));
+      const ready = state.running && clamped >= 100;
+      const charging = state.running && clamped > 0 && clamped < 100;
+      const labelName = mechanic === 'abyss' ? 'Abyss' : 'Breach';
+
+      if (fillEl) {
+        fillEl.style.width = `${clamped}%`;
+      }
+      if (pctEl) {
+        pctEl.textContent = ready ? 'READY' : `${clamped}%`;
+      }
+      if (btnEl) {
+        btnEl.disabled = !ready;
+        btnEl.dataset.charge = String(clamped);
+        btnEl.classList.toggle('is-ready', ready);
+        btnEl.classList.toggle('is-charging', charging);
+        btnEl.setAttribute(
+          'aria-label',
+          ready
+            ? `${labelName} Surge ready — click or press ${hotkeyHint} to unleash`
+            : `${labelName} Surge — ${clamped}% charged`
+        );
+        btnEl.title = ready
+          ? `${labelName} READY (100%) — Click or press ${hotkeyHint} to unleash a high-tier surge!`
+          : `${labelName} Charge (${clamped}%) — Collect currency to fill, click or press ${hotkeyHint} at 100%`;
+      }
+      if (slotEl) {
+        slotEl.classList.toggle('is-ready', ready);
+      }
+    };
+
+    syncPlate('breach', state.breachCharge, dockBreachLabel, dockBreachFill, dockBreachPct, dockBreachSlot, '[1]/[Q]');
+    syncPlate('abyss', state.abyssCharge, dockAbyssLabel, dockAbyssFill, dockAbyssPct, dockAbyssSlot, '[2]/[E]');
+  }
+
+  function activateChargedMechanic(mechanic) {
+    if (!state.running) return false;
+    const isAbyss = mechanic === 'abyss';
+    const current = isAbyss ? state.abyssCharge : state.breachCharge;
+    if (current < 100) return false;
+
+    if (isAbyss) {
+      state.abyssCharge = 0;
+    } else {
+      state.breachCharge = 0;
+    }
+    state.breachHandsClasped++;
+    updateMechanicDockUI();
+
+    const { cx, cy } = getAstrolabeCenterAndRadius();
+    const safe = getPlayfieldSafeBounds();
+    const burstX = Math.max(safe.left + 40, Math.min(safe.right - 40, cx + (Math.random() - 0.5) * 220));
+    const burstY = Math.max(safe.top + 30, Math.min(safe.bottom - 30, cy + (Math.random() - 0.5) * 140));
+
+    triggerAstrolabePulse();
+    triggerScreenShake(260, 7);
+    spawnParticles(burstX, burstY, isAbyss ? '#4dc47d' : '#d946ef', 32);
+    spawnFloatingText(
+      burstX,
+      burstY - 22,
+      isAbyss ? 'ABYSS SURGE UNLEASHED!' : 'BREACH SURGE UNLEASHED!',
+      isAbyss ? '#86efac' : '#f0abfc',
+      20
+    );
+    spawnMonsterBurst({
+      x: burstX,
+      y: burstY,
+      count: 10,
+      breach: true,
+      mechanic: isAbyss ? 'abyss' : 'breach',
+      guaranteeHigh: true
+    });
+    setFeed(
+      isAbyss
+        ? 'Unleashed charged Abyss Surge! Massive high-tier trove erupted!'
+        : 'Unleashed charged Breach Surge! Massive high-tier pack erupted!'
+    );
+    return true;
+  }
+
+  function spawnVaalAltar(forcedPos) {
+    if (state.vaalAltar) return state.vaalAltar;
+    const safe = getPlayfieldSafeBounds();
+    const { cx, cy, r } = getAstrolabeCenterAndRadius();
+    let x = forcedPos && typeof forcedPos.x === 'number'
+      ? forcedPos.x
+      : safe.left + 48 + Math.random() * Math.max(100, safe.right - safe.left - 96);
+    let y = forcedPos && typeof forcedPos.y === 'number'
+      ? forcedPos.y
+      : safe.top + 32 + Math.random() * Math.max(90, safe.bottom - safe.top - 64);
+
+    // Keep Vaal Altar clear of the Astrolabe core so its crimson aura stands out distinctly
+    if (!forcedPos && Math.hypot(x - cx, y - cy) < r * 0.85) {
+      x = cx + (x >= cx ? 1 : -1) * Math.min(r * 1.15, Math.max(120, (safe.right - safe.left) * 0.28));
+      x = Math.max(safe.left + 44, Math.min(safe.right - 44, x));
+    }
+
+    state.vaalAltarsSpawned++;
+    state.vaalAltar = {
+      id: state.nextItemId++,
+      x,
+      y,
+      radius: 31,
+      ageMs: 0,
+      durationMs: 5800
+    };
+    spawnParticles(x, y, '#dc2626', 18);
+    setFeed('Vaal Altar (50/50) appeared! Win drops half your picked orbs; Lose breaks 1 Integrity.');
+    return state.vaalAltar;
+  }
+
+  function handleVaalAltarClick(forcedRoll) {
+    const altar = state.vaalAltar;
+    if (!altar) return null;
+    state.vaalAltar = null;
+    state.vaalAltarsTriggered++;
+
+    const fb = window.FilterBladeSpec;
+    const result =
+      fb && typeof fb.resolveVaalAltarRoll === 'function'
+        ? fb.resolveVaalAltarRoll(state.pickedValuableIds, forcedRoll)
+        : {
+            outcome: (typeof forcedRoll === 'number' ? forcedRoll : Math.random()) < 0.5 && state.pickedValuableIds.length > 0 ? 'duplicate' : 'brick',
+            dropIds: state.pickedValuableIds.slice(0, Math.min(18, Math.max(1, Math.floor(state.pickedValuableIds.length / 2)))),
+            dropCount: Math.min(18, Math.max(1, Math.floor(state.pickedValuableIds.length / 2))),
+            totalPicked: state.pickedValuableIds.length,
+            integrityLoss: 1
+          };
+
+    if (result.outcome === 'duplicate' && result.dropIds.length > 0) {
+      // 50% WIN: Drop HALF of all valuable currencies picked so far back onto the ground (NOT instant score double!)
+      triggerAstrolabePulse();
+      triggerScreenShake(280, 7.5);
+      spawnParticles(altar.x, altar.y, '#ff3b3b', 34);
+      spawnParticles(altar.x, altar.y, '#ffd27d', 20);
+      state.groundRifts.push({
+        x: altar.x,
+        y: altar.y,
+        radius: 14,
+        maxRadius: 112,
+        ageMs: 0,
+        durationMs: 820,
+        mechanic: 'vaal',
+        color: '#ef4444'
+      });
+
+      const byId = new Map(CURRENCY_TABLE.map((c) => [c.id, c]));
+      let spawnedCount = 0;
+      for (const cid of result.dropIds) {
+        const def = byId.get(cid);
+        if (def) {
+          spawnCurrencyItem(altar.x, altar.y, def, { lifetimeBonusMs: 650 });
+          spawnedCount++;
+        }
+      }
+
+      spawnFloatingText(
+        altar.x,
+        altar.y - 22,
+        `VAAL BLESSED! +${spawnedCount} ORBS DROPPED!`,
+        '#ffe082',
+        20
+      );
+      setFeed(
+        `Vaal Altar 50/50 WON! Dropped half of your picked currency (${spawnedCount} orbs) onto the ground — grab them fast!`
+      );
+      updateHUD();
+      return result;
+    }
+
+    // 50% LOSS: Vaal Brick -> Shatter 1 Integrity Gem and reset streak to 1.0x
+    state.clutterClicks++;
+    state.streak = 1.0;
+    triggerDamageFlash();
+    triggerScreenShake(260, 8);
+    spawnParticles(altar.x, altar.y, '#b91c1c', 28);
+    spawnFloatingText(
+      altar.x,
+      altar.y - 20,
+      `VAAL BRICKED! -1 INTEGRITY (${state.clutterClicks}/${MAX_CLUTTER_STRIKES})`,
+      '#ff3838',
+      19
+    );
+    updateHUD();
+
+    if (state.clutterClicks >= MAX_CLUTTER_STRIKES) {
+      finishMapRun(
+        `Vaal Altar Bricked! Shattered final Integrity Gem (${MAX_CLUTTER_STRIKES}/${MAX_CLUTTER_STRIKES}).`
+      );
+      return result;
+    }
+
+    setFeed(
+      `Vaal Altar 50/50 BRICKED! Shattered 1 Integrity Gem (${state.clutterClicks}/${MAX_CLUTTER_STRIKES}) — Streak reset to 1.0x.`
+    );
+    return result;
   }
 
   // ---------------------------------------------------------------------------
@@ -1065,9 +1364,12 @@
       const awarded = Math.round(basePts * state.streak);
       state.score += awarded;
       state.validClicks++;
+      state.pickedValuableIds.push(item.currency.id);
 
       // Advance streak (+0.1x per consecutive valid click, up to 5.0x)
+      const prevStreakTier = Math.floor(state.streak);
       state.streak = Math.min(5.0, Math.round((state.streak + 0.1) * 10) / 10);
+      const nextStreakTier = Math.floor(state.streak);
       if (state.streak > state.maxStreak) {
         state.maxStreak = state.streak;
       }
@@ -1088,6 +1390,38 @@
         triggerScreenShake(220, 6);
       }
 
+      // Charge interactive Breach & Abyss dock gauges on every valuable currency pickup
+      const fbSpec = window.FilterBladeSpec;
+      const wasBreachReady = state.breachCharge >= 100;
+      const wasAbyssReady = state.abyssCharge >= 100;
+      if (fbSpec && typeof fbSpec.advanceMechanicCharge === 'function') {
+        state.breachCharge = fbSpec.advanceMechanicCharge(
+          state.breachCharge,
+          state.streak,
+          isHighTier || item.currency.tier === 'A+',
+          'breach'
+        ).charge;
+        state.abyssCharge = fbSpec.advanceMechanicCharge(
+          state.abyssCharge,
+          state.streak,
+          isHighTier || item.currency.tier === 'A+',
+          'abyss'
+        ).charge;
+      } else {
+        state.breachCharge = Math.min(100, state.breachCharge + (isHighTier ? 18 : 10));
+        state.abyssCharge = Math.min(100, state.abyssCharge + (isHighTier ? 14 : 12));
+      }
+      updateMechanicDockUI();
+
+      if (!wasBreachReady && state.breachCharge >= 100) {
+        const { cx, cy, r } = getAstrolabeCenterAndRadius();
+        spawnFloatingText(cx - r * 0.45, cy + r * 0.55, 'BREACH SURGE READY [1]', '#e879f9', 15);
+      }
+      if (!wasAbyssReady && state.abyssCharge >= 100) {
+        const { cx, cy, r } = getAstrolabeCenterAndRadius();
+        spawnFloatingText(cx + r * 0.45, cy + r * 0.55, 'ABYSS SURGE READY [2]', '#6ee7b7', 15);
+      }
+
       spawnParticles(
         item.anchorX,
         item.anchorY,
@@ -1101,6 +1435,29 @@
         isHighTier ? '#ff3b3b' : '#ffd700',
         isHighTier ? 22 : 17
       );
+
+      // Whole-multiplier milestone feedback: pulse Astrolabe, ignite arcs/embers, announce tougher tempo
+      if (nextStreakTier > prevStreakTier) {
+        triggerAstrolabePulse();
+        const { cx, cy, r } = getAstrolabeCenterAndRadius();
+        for (let k = 0; k < 10; k++) {
+          spawnAstrolabeEmber(cx, cy, r, Math.min(1, (state.streak - 1) / 4));
+        }
+        spawnAstrolabeArc(cx, cy, r, Math.min(1, (state.streak - 1) / 4));
+        const tierCallouts = {
+          2: '2.0x — TEMPO RISING',
+          3: '3.0x — ARCANE SURGE',
+          4: '4.0x — DELIRIUM OVERLOAD',
+          5: '5.0x — MAX OVERDRIVE!'
+        };
+        spawnFloatingText(
+          cx,
+          cy - r * 0.65,
+          tierCallouts[nextStreakTier] || `${nextStreakTier}.0x SURGE`,
+          nextStreakTier >= 4 ? '#ff5938' : '#ffb84d',
+          17
+        );
+      }
 
       setFeed(`Collected ${item.currency.name} for +${awarded} pts! Streak: ${state.streak.toFixed(1)}x`);
       updateHUD();
@@ -1235,13 +1592,22 @@
     const y = ev.clientY - rect.top;
 
     let interactive = false;
-    for (let i = state.breachHands.length - 1; i >= 0; i--) {
-      const hand = state.breachHands[i];
-      const dx = x - hand.x;
-      const dy = y - hand.y;
-      if (dx * dx + dy * dy <= (hand.radius + 14) * (hand.radius + 14)) {
+    if (state.vaalAltar) {
+      const dx = x - state.vaalAltar.x;
+      const dy = y - state.vaalAltar.y;
+      if (dx * dx + dy * dy <= (state.vaalAltar.radius + 16) * (state.vaalAltar.radius + 16)) {
         interactive = true;
-        break;
+      }
+    }
+    if (!interactive) {
+      for (let i = state.breachHands.length - 1; i >= 0; i--) {
+        const hand = state.breachHands[i];
+        const dx = x - hand.x;
+        const dy = y - hand.y;
+        if (dx * dx + dy * dy <= (hand.radius + 14) * (hand.radius + 14)) {
+          interactive = true;
+          break;
+        }
       }
     }
 
@@ -1274,6 +1640,16 @@
     const rect = canvas.getBoundingClientRect();
     const x = ev.clientX - rect.left;
     const y = ev.clientY - rect.top;
+
+    // 0. Check rare Vaal Altar (50/50 gamble) first
+    if (state.vaalAltar) {
+      const dx = x - state.vaalAltar.x;
+      const dy = y - state.vaalAltar.y;
+      if (dx * dx + dy * dy <= (state.vaalAltar.radius + 16) * (state.vaalAltar.radius + 16)) {
+        handleVaalAltarClick();
+        return;
+      }
+    }
 
     // 1. Check clickable Breach & Abyss nodes first
     for (let i = state.breachHands.length - 1; i >= 0; i--) {
@@ -1371,13 +1747,22 @@
     state.running = true;
     state.elapsedMs = 0;
     state.score = 0;
+    state.prevHighScore = state.highScore;
     state.streak = 1.0;
     state.maxStreak = 1.0;
     state.validClicks = 0;
     state.clutterClicks = 0;
     state.breachHandsClasped = 0;
+    state.breachCharge = 0;
+    state.abyssCharge = 0;
+    state.pickedValuableIds = [];
+    state.vaalAltar = null;
+    state.vaalAltarsSpawned = 0;
+    state.vaalAltarsTriggered = 0;
+    state.breakdownFilter = 'all';
     state.nextBurstInMs = 120;
     state.nextBreachHandInMs = 2800;
+    state.nextVaalAltarInMs = 20000 + Math.random() * 10000;
 
     summaryModal.classList.add('hidden');
     if (helpModal) helpModal.classList.add('hidden');
@@ -1388,6 +1773,7 @@
     }
     if (btnStartMap) btnStartMap.classList.add('is-running');
     triggerAstrolabePulse();
+    updateMechanicDockUI();
 
     // Spawn an immediate opening pack around the Astrolabe
     const { cx, cy } = getAstrolabeCenterAndRadius();
@@ -1415,6 +1801,7 @@
       astrolabeStage.tabIndex = 0;
     }
     if (btnStartMap) btnStartMap.classList.remove('is-running');
+    updateMechanicDockUI();
     setFeed(reasonText || 'T16 Delirium Map Complete! All 60 seconds survived.');
     openSummaryModal(reasonText || 'T16 Delirium Map Complete');
     updateHUD();
@@ -1428,7 +1815,11 @@
     });
     state.items = [];
     state.breachHands = [];
+    state.vaalAltar = null;
     state.groundRifts = [];
+    state.astrolabeEmbers = [];
+    state.astrolabeArcs = [];
+    state.astrolabeEmberCarry = 0;
   }
 
   function updateHUD() {
@@ -1473,18 +1864,7 @@
     }
   }
 
-  function openSummaryModal(subtitleText) {
-    const totalClicks = state.validClicks + state.clutterClicks;
-    const acc = totalClicks > 0 ? Math.round((state.validClicks / totalClicks) * 100) : 100;
-    const remainingIntegrity = Math.max(0, MAX_CLUTTER_STRIKES - state.clutterClicks);
-
-    modalSubtitle.textContent = subtitleText || 'Post-Map Loot Breakdown';
-    modalScore.textContent = Math.round(state.score).toLocaleString();
-    modalHighScore.textContent = state.highScore.toLocaleString();
-    modalMaxStreak.textContent = `${state.maxStreak.toFixed(1)}x`;
-    modalStrikes.textContent = `${remainingIntegrity} / ${MAX_CLUTTER_STRIKES}`;
-    modalAccuracy.textContent = `${acc}%`;
-
+  function renderBreakdownRows() {
     const layout = modalAssets.rowLayout || [
       { left: 0.7, width: 4.5 },
       { left: 6.0, width: 26.4 },
@@ -1498,9 +1878,25 @@
       ? `background-image:url('${modalAssets.rowBgUrl}')`
       : '';
 
-    // Populate all currencies ordered from S++ / S+ / S-Tier down to F-Tier
-    const ordered = [...CURRENCY_TABLE].sort((a, b) => b.points - a.points);
-    breakdownTbody.innerHTML = ordered
+    const fbSpec = window.FilterBladeSpec;
+    const orderedAll = [...CURRENCY_TABLE].sort((a, b) => b.points - a.points);
+    const filtered =
+      fbSpec && typeof fbSpec.filterBreakdownCurrencies === 'function'
+        ? fbSpec.filterBreakdownCurrencies(orderedAll, state.statsByCurrency, state.breakdownFilter)
+        : orderedAll;
+
+    if (filtered.length === 0) {
+      const emptyMsg =
+        state.breakdownFilter === 'collected'
+          ? 'No currencies were collected in this map run yet.'
+          : state.breakdownFilter === 'missed'
+          ? 'Perfect eyes — zero currencies were missed in this map run.'
+          : 'No currency entries recorded.';
+      breakdownTbody.innerHTML = `<div class="modal-ledger-empty" role="status">${emptyMsg}</div>`;
+      return;
+    }
+
+    breakdownTbody.innerHTML = filtered
       .map((c) => {
         const st = state.statsByCurrency[c.id] || { clicked: 0, missed: 0, netPoints: 0 };
         const baseStr = c.points > 0 ? `+${c.points.toLocaleString()}` : String(c.points);
@@ -1516,11 +1912,14 @@
 
         const orbUrl = modalAssets.currencyIcons.get(c.id) || CURRENCY_ICON_PATHS[c.id] || '';
         const tierBadgeUrl = modalAssets.tierBadges.get(c.tier) || '';
-        const tierTxtClass =
-          c.tier === 'S++'
-            ? 'tier-txt-spp'
-            : c.tier === 'D' || c.tier === 'F'
-            ? 'tier-txt-iron'
+        const badgeTheme =
+          fbSpec && typeof fbSpec.getTierBadgeTheme === 'function'
+            ? fbSpec.getTierBadgeTheme(c.tier)
+            : null;
+        const tierTxtClass = badgeTheme ? badgeTheme.textClass : '';
+        const shieldGlowStyle =
+          badgeTheme && badgeTheme.glowRgba
+            ? `style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.95)) drop-shadow(0 0 5px ${badgeTheme.glowRgba});"`
             : '';
 
         const c0 = layout[0];
@@ -1532,7 +1931,7 @@
         const c6 = layout[6];
 
         return `
-          <div class="modal-ledger-row" role="row" data-currency-id="${c.id}" style="${rowBgStyle}">
+          <div class="modal-ledger-row" role="row" data-currency-id="${c.id}" data-tier="${c.tier}" style="${rowBgStyle}">
             <div class="ledger-cell ledger-cell-socket" role="cell" style="left:${c0.left}%;width:${c0.width}%;">
               ${orbUrl ? `<img class="ledger-orb-img" src="${orbUrl}" alt="${c.name}" />` : ''}
             </div>
@@ -1540,8 +1939,8 @@
               <span class="ledger-currency-name">${c.name}</span>
             </div>
             <div class="ledger-cell" role="cell" style="left:${c2.left}%;width:${c2.width}%;">
-              <div class="ledger-tier-shield-wrap" aria-label="Tier ${c.tier}">
-                ${tierBadgeUrl ? `<img class="ledger-tier-shield-img" src="${tierBadgeUrl}" alt="" aria-hidden="true" />` : ''}
+              <div class="ledger-tier-shield-wrap" data-badge-mode="${badgeTheme ? badgeTheme.mode : ''}" aria-label="Tier ${c.tier}">
+                ${tierBadgeUrl ? `<img class="ledger-tier-shield-img" src="${tierBadgeUrl}" ${shieldGlowStyle} alt="" aria-hidden="true" />` : ''}
                 <span class="ledger-tier-shield-text ${tierTxtClass}">${c.tier}</span>
               </div>
             </div>
@@ -1553,7 +1952,111 @@
         `;
       })
       .join('');
+  }
 
+  function setBreakdownFilter(nextFilter) {
+    if (nextFilter !== 'all' && nextFilter !== 'collected' && nextFilter !== 'missed') return;
+    state.breakdownFilter = nextFilter;
+    const tabs = [
+      [btnFilterAll, 'all'],
+      [btnFilterCollected, 'collected'],
+      [btnFilterMissed, 'missed']
+    ];
+    for (const [btn, key] of tabs) {
+      if (!btn) continue;
+      const isActive = key === nextFilter;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', String(isActive));
+    }
+    renderBreakdownRows();
+  }
+
+  function openSummaryModal(subtitleText) {
+    const totalClicks = state.validClicks + state.clutterClicks;
+    const acc = totalClicks > 0 ? Math.round((state.validClicks / totalClicks) * 100) : 100;
+    const remainingIntegrity = Math.max(0, MAX_CLUTTER_STRIKES - state.clutterClicks);
+
+    modalSubtitle.textContent = subtitleText || 'Post-Map Loot Breakdown';
+    modalScore.textContent = Math.round(state.score).toLocaleString();
+    modalHighScore.textContent = state.highScore.toLocaleString();
+    modalMaxStreak.textContent = `${state.maxStreak.toFixed(1)}x`;
+    modalStrikes.textContent = `${remainingIntegrity} / ${MAX_CLUTTER_STRIKES}`;
+    modalAccuracy.textContent = `${acc}%`;
+
+    // Heraldic Run Grade shield using the distinct 8-tier sculpted badge palette
+    const fbSpec = window.FilterBladeSpec;
+    const gradeInfo =
+      fbSpec && typeof fbSpec.computeMapRunGrade === 'function'
+        ? fbSpec.computeMapRunGrade({
+            score: state.score,
+            accuracy: acc,
+            maxStreak: state.maxStreak,
+            strikesUsed: state.clutterClicks,
+            validClicks: state.validClicks
+          })
+        : { grade: 'F', label: 'Unclaimed Map' };
+    const gradeTheme =
+      fbSpec && typeof fbSpec.getTierBadgeTheme === 'function'
+        ? fbSpec.getTierBadgeTheme(gradeInfo.grade)
+        : null;
+    const gradeUrl = modalAssets.tierBadges.get(gradeInfo.grade) || '';
+
+    if (modalGradeShieldImg) {
+      if (gradeUrl) {
+        modalGradeShieldImg.src = gradeUrl;
+        modalGradeShieldImg.style.filter =
+          gradeTheme && gradeTheme.glowRgba
+            ? `drop-shadow(0 2px 4px rgba(0,0,0,0.95)) drop-shadow(0 0 6px ${gradeTheme.glowRgba})`
+            : 'drop-shadow(0 2px 4px rgba(0,0,0,0.95))';
+      }
+    }
+    if (modalGradeShieldText) {
+      modalGradeShieldText.textContent = gradeInfo.grade;
+      modalGradeShieldText.className = `ledger-tier-shield-text modal-grade-shield-text ${
+        gradeTheme ? gradeTheme.textClass : 'tier-txt-f'
+      }`;
+    }
+    if (modalGradeWrap) {
+      modalGradeWrap.title = `Run Grade ${gradeInfo.grade} — ${gradeInfo.label}`;
+      modalGradeWrap.setAttribute('aria-label', `Run Grade ${gradeInfo.grade} — ${gradeInfo.label}`);
+      modalGradeWrap.dataset.grade = gradeInfo.grade;
+    }
+
+    // Personal Best Delta badge
+    if (modalBestDelta) {
+      const roundedScore = Math.round(state.score);
+      const prevBest = Math.round(state.prevHighScore || 0);
+      modalBestDelta.classList.remove('is-record', 'is-behind');
+      if (roundedScore > 0 && roundedScore > prevBest) {
+        modalBestDelta.textContent =
+          prevBest > 0
+            ? `NEW RECORD +${(roundedScore - prevBest).toLocaleString()}`
+            : `NEW RECORD`;
+        modalBestDelta.classList.add('is-record');
+      } else if (prevBest > 0 && roundedScore > 0) {
+        const diff = prevBest - roundedScore;
+        modalBestDelta.textContent =
+          diff === 0 ? 'TIED BEST' : `-${diff.toLocaleString()} VS BEST`;
+        modalBestDelta.classList.add(diff === 0 ? 'is-record' : 'is-behind');
+      } else {
+        modalBestDelta.textContent = '';
+      }
+    }
+
+    // Dynamic counts on All / Collected / Missed tabs
+    const collectedCount =
+      fbSpec && typeof fbSpec.filterBreakdownCurrencies === 'function'
+        ? fbSpec.filterBreakdownCurrencies(CURRENCY_TABLE, state.statsByCurrency, 'collected').length
+        : 0;
+    const missedCount =
+      fbSpec && typeof fbSpec.filterBreakdownCurrencies === 'function'
+        ? fbSpec.filterBreakdownCurrencies(CURRENCY_TABLE, state.statsByCurrency, 'missed').length
+        : 0;
+    if (filterCountAll) filterCountAll.textContent = String(CURRENCY_TABLE.length);
+    if (filterCountCollected) filterCountCollected.textContent = String(collectedCount);
+    if (filterCountMissed) filterCountMissed.textContent = String(missedCount);
+
+    setBreakdownFilter('all');
     summaryModal.classList.remove('hidden');
   }
 
@@ -1567,14 +2070,234 @@
     const dtMs = Math.min(64, Math.max(1, now - lastFrameTime));
     lastFrameTime = now;
 
-    updateSimulation(dtMs);
+    updateSimulation(dtMs, now);
     renderCanvas(dtMs, now);
 
     requestAnimationFrame(frameLoop);
   }
 
-  function updateSimulation(dtMs) {
-    // 1. Active Map Timer & Rapid Wave Spawner
+  function spawnAstrolabeEmber(cx, cy, r, intensity) {
+    if (state.astrolabeEmbers.length >= 70) return;
+    const angle = Math.random() * Math.PI * 2;
+    const radialFactor = 0.72 + Math.random() * 0.34;
+    const x = cx + Math.cos(angle) * r * radialFactor;
+    const y = cy + Math.sin(angle) * r * radialFactor;
+    const tangentSpeed = (18 + Math.random() * 38) * (0.65 + intensity * 0.95);
+    const outwardSpeed = (10 + Math.random() * 24) * (0.5 + intensity * 0.9);
+    const vx = -Math.sin(angle) * tangentSpeed + Math.cos(angle) * outwardSpeed;
+    const vy = Math.cos(angle) * tangentSpeed + Math.sin(angle) * outwardSpeed - (22 + Math.random() * 34) * (0.6 + intensity);
+
+    // Palette shifts from warm gold-amber sparks -> molten ember orange -> incandescent crimson-gold
+    const roll = Math.random();
+    let color = '#ffcf70';
+    if (intensity > 0.65 && roll < 0.42) {
+      color = '#ff4d2e';
+    } else if (intensity > 0.25 && roll < 0.72) {
+      color = '#ff9234';
+    }
+
+    state.astrolabeEmbers.push({
+      x,
+      y,
+      vx,
+      vy,
+      size: 1.4 + Math.random() * (1.8 + intensity * 1.4),
+      color,
+      ageMs: 0,
+      durationMs: 420 + Math.random() * 520,
+      flickerPhase: Math.random() * Math.PI * 2
+    });
+  }
+
+  function buildLightningPolyline(x0, y0, x1, y1, segments, jitter) {
+    const pts = [{ x: x0, y: y0 }];
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len;
+    const ny = dx / len;
+    for (let i = 1; i < segments; i++) {
+      const t = i / segments;
+      const taper = Math.sin(t * Math.PI); // Pin both ends cleanly onto the Astrolabe ring
+      const offset = (Math.random() - 0.5) * 2 * jitter * taper;
+      pts.push({
+        x: x0 + dx * t + nx * offset,
+        y: y0 + dy * t + ny * offset
+      });
+    }
+    pts.push({ x: x1, y: y1 });
+    return pts;
+  }
+
+  function spawnAstrolabeArc(cx, cy, r, intensity) {
+    const baseAngle = Math.random() * Math.PI * 2;
+    const arcSpan = 0.42 + Math.random() * (0.65 + intensity * 0.55);
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const r0 = r * (0.76 + Math.random() * 0.22);
+    const r1 = r * (0.80 + Math.random() * 0.28);
+    const x0 = cx + Math.cos(baseAngle) * r0;
+    const y0 = cy + Math.sin(baseAngle) * r0;
+    const endAngle = baseAngle + dir * arcSpan;
+    const x1 = cx + Math.cos(endAngle) * r1;
+    const y1 = cy + Math.sin(endAngle) * r1;
+
+    const segments = 6 + Math.floor(intensity * 4);
+    const jitter = 8 + intensity * 16;
+    const mainPts = buildLightningPolyline(x0, y0, x1, y1, segments, jitter);
+
+    // Optional short crackling fork branching outward at >= 3.0x streaks
+    let branchPts = null;
+    if (intensity >= 0.42 && Math.random() < 0.55) {
+      const forkIdx = Math.max(1, Math.min(mainPts.length - 2, Math.floor(mainPts.length * (0.35 + Math.random() * 0.35))));
+      const origin = mainPts[forkIdx];
+      const outAngle = Math.atan2(origin.y - cy, origin.x - cx) + (Math.random() - 0.5) * 0.7;
+      const branchLen = r * (0.14 + Math.random() * 0.18 * intensity);
+      branchPts = buildLightningPolyline(
+        origin.x,
+        origin.y,
+        origin.x + Math.cos(outAngle) * branchLen,
+        origin.y + Math.sin(outAngle) * branchLen,
+        4,
+        6 + intensity * 8
+      );
+    }
+
+    const isCrimsonOverdrive = intensity >= 0.7 && Math.random() < 0.52;
+    const glowColor = isCrimsonOverdrive
+      ? 'rgba(255, 76, 48, 0.85)'
+      : intensity >= 0.45 && Math.random() < 0.35
+      ? 'rgba(196, 138, 255, 0.82)'
+      : 'rgba(255, 178, 72, 0.85)';
+
+    state.astrolabeArcs.push({
+      points: mainPts,
+      branch: branchPts,
+      glowColor,
+      coreColor: isCrimsonOverdrive ? '#fff0df' : '#fff8e8',
+      width: 1.0 + intensity * 0.9,
+      ageMs: 0,
+      durationMs: 95 + Math.random() * 95
+    });
+  }
+
+  function updateAstrolabeDistortion(dtMs, now) {
+    const activeStreak = state.running ? state.streak : 1.0;
+    const profile = getCurrentStreakIntensityProfile(activeStreak);
+    const targetCharge = profile.intensity;
+    const lerpRate = targetCharge > state.astrolabeCharge ? 5.5 : 3.8;
+    const step = Math.min(1, (dtMs / 1000) * lerpRate);
+    state.astrolabeCharge += (targetCharge - state.astrolabeCharge) * step;
+    if (Math.abs(state.astrolabeCharge - targetCharge) < 0.002) {
+      state.astrolabeCharge = targetCharge;
+    }
+
+    const charge = state.astrolabeCharge;
+
+    // Sync subtle SVG turbulence heat-haze distortion & accelerated Astrolabe spin speed
+    if (astrolabeStage) {
+      astrolabeStage.dataset.streakTier = String(profile.tier);
+      astrolabeStage.dataset.charge = charge.toFixed(2);
+
+      if (charge > 0.015) {
+        astrolabeStage.classList.add('streak-distorting');
+        astrolabeStage.style.setProperty('--astrolabe-glow-alpha', charge.toFixed(3));
+        const glowRgb =
+          activeStreak >= 4.0
+            ? '255, 74, 42'
+            : activeStreak >= 3.0
+            ? '255, 118, 44'
+            : '255, 178, 72';
+        astrolabeStage.style.setProperty('--astrolabe-glow-rgb', glowRgb);
+
+        if (astrolabeDisplacement) {
+          const pulse = 1 + 0.14 * Math.sin(now * 0.011);
+          const scaleVal = (1.1 + charge * 6.3) * pulse;
+          astrolabeDisplacement.setAttribute('scale', Math.min(7.5, Math.max(0, scaleVal)).toFixed(2));
+        }
+        // Shift turbulence frequency gently at ~10Hz for smooth living heat-shimmer without heavy DOM churn
+        if (astrolabeTurbulence && now - state.lastDistortionTickMs >= 100) {
+          state.lastDistortionTickMs = now;
+          const fx = profile.turbulenceFreq + Math.sin(now * 0.0045) * 0.0032;
+          const fy = profile.turbulenceFreq * 1.38 + Math.cos(now * 0.0058) * 0.0036;
+          astrolabeTurbulence.setAttribute('baseFrequency', `${fx.toFixed(4)} ${fy.toFixed(4)}`);
+        }
+      } else {
+        astrolabeStage.classList.remove('streak-distorting');
+        astrolabeStage.style.setProperty('--astrolabe-glow-alpha', '0');
+        if (astrolabeDisplacement && astrolabeDisplacement.getAttribute('scale') !== '0') {
+          astrolabeDisplacement.setAttribute('scale', '0');
+        }
+      }
+
+      // Smoothly accelerate Astrolabe ring rotation speed without resetting rotation angle
+      const targetRate = 1 + charge * 2.4;
+      if (imgAstrolabeMid && typeof imgAstrolabeMid.getAnimations === 'function') {
+        imgAstrolabeMid.getAnimations().forEach((anim) => {
+          if (Math.abs(anim.playbackRate - targetRate) > 0.04) {
+            anim.playbackRate = targetRate;
+          }
+        });
+      }
+      if (imgAstrolabeCore && typeof imgAstrolabeCore.getAnimations === 'function') {
+        imgAstrolabeCore.getAnimations().forEach((anim) => {
+          if (Math.abs(anim.playbackRate - targetRate) > 0.04) {
+            anim.playbackRate = targetRate;
+          }
+        });
+      }
+    }
+
+    // Spawn embers & electrical arcs around the Astrolabe rim proportional to streak intensity
+    if (charge > 0.02 && state.running) {
+      const { cx, cy, r } = getAstrolabeCenterAndRadius();
+      state.astrolabeEmberCarry += (profile.emberRate * dtMs) / 1000;
+      while (state.astrolabeEmberCarry >= 1) {
+        state.astrolabeEmberCarry -= 1;
+        spawnAstrolabeEmber(cx, cy, r, charge);
+      }
+
+      state.astrolabeArcCooldownMs -= dtMs;
+      if (
+        profile.maxArcs > 0 &&
+        state.astrolabeArcs.length < profile.maxArcs &&
+        state.astrolabeArcCooldownMs <= 0
+      ) {
+        if (Math.random() < profile.arcChance) {
+          spawnAstrolabeArc(cx, cy, r, charge);
+        }
+        state.astrolabeArcCooldownMs = Math.max(45, 220 - charge * 155);
+      }
+    }
+
+    // Update active embers
+    for (let i = state.astrolabeEmbers.length - 1; i >= 0; i--) {
+      const e = state.astrolabeEmbers[i];
+      e.ageMs += dtMs;
+      if (e.ageMs >= e.durationMs) {
+        state.astrolabeEmbers.splice(i, 1);
+        continue;
+      }
+      e.x += (e.vx * dtMs) / 1000;
+      e.y += (e.vy * dtMs) / 1000;
+      e.vx *= 0.992;
+      e.vy -= (18 * dtMs) / 1000; // Subtle rising heat draft
+    }
+
+    // Update active electrical arcs
+    for (let i = state.astrolabeArcs.length - 1; i >= 0; i--) {
+      const arc = state.astrolabeArcs[i];
+      arc.ageMs += dtMs;
+      if (arc.ageMs >= arc.durationMs) {
+        state.astrolabeArcs.splice(i, 1);
+      }
+    }
+  }
+
+  function updateSimulation(dtMs, now) {
+    // 0. Update Astrolabe fire/electrical streak distortion & particle pools
+    updateAstrolabeDistortion(dtMs, now);
+
+    // 1. Active Map Timer & Streak-Scaled Rapid Wave Spawner
     if (state.running) {
       state.elapsedMs += dtMs;
 
@@ -1585,24 +2308,56 @@
         return;
       }
 
-      // Fast Automatic Breach/Abyss Burst Waves (every 550–850ms; 400–620ms in final 20s)
+      // Automatic Breach/Abyss Burst Waves — cadence accelerates with every streak multiplier increase
       state.nextBurstInMs -= dtMs;
       if (state.nextBurstInMs <= 0) {
         const isFinale =
           state.mode === 'timed' && state.mapDurationMs - state.elapsedMs <= 20000;
+        const diff = getCurrentStreakDifficulty(isFinale);
         spawnMonsterBurst();
-        state.nextBurstInMs = isFinale
-          ? 400 + Math.random() * 220
-          : 550 + Math.random() * 300;
+        state.nextBurstInMs =
+          diff.burstIntervalMinMs +
+          Math.random() * Math.max(80, diff.burstIntervalMaxMs - diff.burstIntervalMinMs);
       }
 
-      // Spawn clickable Breach Hands occasionally
+      // Spawn clickable Breach Hands occasionally (slightly quicker at higher streak multipliers)
       state.nextBreachHandInMs -= dtMs;
       if (state.nextBreachHandInMs <= 0) {
         if (state.breachHands.length < 2) {
           spawnBreachHand();
         }
-        state.nextBreachHandInMs = 4200 + Math.random() * 2000;
+        const streakBonusMs = Math.min(900, (state.streak - 1) * 220);
+        state.nextBreachHandInMs = Math.max(3000, 4200 - streakBonusMs) + Math.random() * 1900;
+      }
+
+      // Rare Vaal Altar (50/50) encounter — genuinely rare (~42% roll after 20s+, >= 6 valuable picks, max 1 per 60s timed map)
+      state.nextVaalAltarInMs -= dtMs;
+      if (state.nextVaalAltarInMs <= 0) {
+        const fbSpec = window.FilterBladeSpec;
+        const eligible =
+          !state.vaalAltar &&
+          (fbSpec && typeof fbSpec.shouldSpawnVaalAltar === 'function'
+            ? fbSpec.shouldSpawnVaalAltar({
+                elapsedMs: state.elapsedMs,
+                pickedCount: state.pickedValuableIds.length,
+                altarsSpawnedThisRun: state.vaalAltarsSpawned,
+                mode: state.mode
+              })
+            : state.elapsedMs >= 20000 &&
+              state.pickedValuableIds.length >= 6 &&
+              (state.mode !== 'timed' || state.vaalAltarsSpawned < 1) &&
+              Math.random() < 0.4);
+
+        if (eligible) {
+          spawnVaalAltar();
+          state.nextVaalAltarInMs =
+            state.mode === 'timed' ? 60000 : 34000 + Math.random() * 14000;
+        } else {
+          state.nextVaalAltarInMs =
+            state.mode === 'timed' && state.vaalAltarsSpawned >= 1
+              ? 60000
+              : 14000 + Math.random() * 8000;
+        }
       }
     }
 
@@ -1679,12 +2434,18 @@
       }
     }
 
-    // 3. Update Clickable Breach Hands
+    // 3. Update Clickable Breach Hands & Rare Vaal Altar
     for (let i = state.breachHands.length - 1; i >= 0; i--) {
       const hand = state.breachHands[i];
       hand.ageMs += dtMs;
       if (hand.ageMs >= hand.durationMs) {
         state.breachHands.splice(i, 1);
+      }
+    }
+    if (state.vaalAltar) {
+      state.vaalAltar.ageMs += dtMs;
+      if (state.vaalAltar.ageMs >= state.vaalAltar.durationMs) {
+        state.vaalAltar = null;
       }
     }
 
@@ -1725,6 +2486,135 @@
     updateHUD();
   }
 
+  function renderAstrolabeStreakDistortion(now) {
+    const charge = state.astrolabeCharge;
+    if (
+      charge <= 0.008 &&
+      state.astrolabeEmbers.length === 0 &&
+      state.astrolabeArcs.length === 0
+    ) {
+      return;
+    }
+
+    const { cx, cy, r } = getAstrolabeCenterAndRadius();
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+
+    // Layer A: Subtle molten ember-fire corona hugging the Astrolabe outer runic rings
+    if (charge > 0.008) {
+      const pulse = 0.92 + 0.1 * Math.sin(now * 0.0065);
+      const outerR = r * (1.16 + charge * 0.22) * pulse;
+      const corona = ctx.createRadialGradient(cx, cy, r * 0.56, cx, cy, outerR);
+      const hotRed = Math.round(255);
+      const hotGreen = Math.round(176 - charge * 102);
+      const hotBlue = Math.round(68 - charge * 36);
+      corona.addColorStop(0, 'rgba(255, 196, 92, 0)');
+      corona.addColorStop(0.42, `rgba(${hotRed}, ${hotGreen}, ${hotBlue}, ${(charge * 0.14).toFixed(3)})`);
+      corona.addColorStop(0.68, `rgba(255, ${Math.max(44, hotGreen - 32)}, 26, ${(charge * 0.24).toFixed(3)})`);
+      corona.addColorStop(0.86, `rgba(198, 42, 24, ${(charge * 0.11).toFixed(3)})`);
+      corona.addColorStop(1, 'rgba(120, 18, 12, 0)');
+      ctx.fillStyle = corona;
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Two subtle undulating heat-shimmer / flame-tongue ring contours rotating around the Astrolabe rim
+      for (let ringIdx = 0; ringIdx < 2; ringIdx++) {
+        const ringBaseR = r * (ringIdx === 0 ? 0.89 : 1.03);
+        const speed = ringIdx === 0 ? 0.0024 : -0.0033;
+        const amp = (2.2 + charge * 8.5) * (ringIdx === 0 ? 0.85 : 1.15);
+        const alpha = charge * (ringIdx === 0 ? 0.22 : 0.16);
+
+        ctx.beginPath();
+        const steps = 64;
+        for (let s = 0; s <= steps; s++) {
+          const theta = (s / steps) * Math.PI * 2;
+          const wave =
+            Math.sin(theta * 5 + now * speed) * amp * 0.65 +
+            Math.cos(theta * 9 - now * speed * 1.45) * amp * 0.35;
+          const rr = ringBaseR + wave;
+          const px = cx + Math.cos(theta) * rr;
+          const py = cy + Math.sin(theta) * rr;
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.strokeStyle =
+          ringIdx === 0
+            ? `rgba(255, ${Math.round(188 - charge * 78)}, 74, ${alpha.toFixed(3)})`
+            : `rgba(255, ${Math.round(126 - charge * 62)}, ${Math.round(52 + charge * 40)}, ${alpha.toFixed(3)})`;
+        ctx.lineWidth = 1.2 + charge * 2.1;
+        ctx.shadowColor = `rgba(255, ${Math.round(110 - charge * 55)}, 32, ${(charge * 0.55).toFixed(3)})`;
+        ctx.shadowBlur = 8 + charge * 12;
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+    }
+
+    // Layer B: Rising fire embers peeling off the Astrolabe rim
+    for (const e of state.astrolabeEmbers) {
+      const p = e.ageMs / e.durationMs;
+      const flicker = 0.72 + 0.28 * Math.sin(now * 0.022 + e.flickerPhase);
+      const alpha = Math.max(0, Math.sin(Math.min(1, p) * Math.PI) * 0.88 * flicker);
+      const rad = Math.max(0.6, e.size * (1 - p * 0.45));
+
+      ctx.globalAlpha = alpha * 0.42;
+      ctx.fillStyle = e.color;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, rad * 2.6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#fff5dc';
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, rad * 0.72, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Layer C: Crackling electrical lightning arcs along & branching off the Astrolabe rings
+    const strokePolyline = (pts) => {
+      if (!pts || pts.length < 2) return;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
+      ctx.stroke();
+    };
+
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    for (const arc of state.astrolabeArcs) {
+      const p = arc.ageMs / arc.durationMs;
+      const lifeAlpha = Math.max(0, 1 - p * p);
+
+      // Soft outer electrical glow
+      ctx.globalAlpha = lifeAlpha * 0.52;
+      ctx.strokeStyle = arc.glowColor;
+      ctx.lineWidth = arc.width * 3.8;
+      ctx.shadowColor = arc.glowColor;
+      ctx.shadowBlur = 12;
+      strokePolyline(arc.points);
+      if (arc.branch) {
+        ctx.lineWidth = arc.width * 2.5;
+        strokePolyline(arc.branch);
+      }
+
+      // Razor-sharp white-gold electrical core filament
+      ctx.globalAlpha = lifeAlpha * 0.92;
+      ctx.strokeStyle = arc.coreColor;
+      ctx.lineWidth = arc.width;
+      ctx.shadowBlur = 4;
+      strokePolyline(arc.points);
+      if (arc.branch) {
+        ctx.lineWidth = Math.max(0.75, arc.width * 0.72);
+        strokePolyline(arc.branch);
+      }
+    }
+
+    ctx.restore();
+  }
+
   function renderCanvas(dtMs, now) {
     ctx.save();
     ctx.clearRect(0, 0, viewWidth, viewHeight);
@@ -1754,6 +2644,9 @@
       ctx.fill();
     }
 
+    // 2. Subtle Fire Corona, Heat Shimmer & Electrical Arcs around the Central Astrolabe (scales with streak)
+    renderAstrolabeStreakDistortion(now);
+
     // 3. Breach / Abyss Monster Pop Rifts (with uploaded Breach & Abyss icons)
     for (const r of state.groundRifts) {
       const p = r.ageMs / r.durationMs;
@@ -1766,7 +2659,10 @@
       ctx.ellipse(r.x, r.y, rad, rad * 0.58, 0, 0, Math.PI * 2);
       ctx.stroke();
 
-      const iconImg = mechanicIconCache.get(r.mechanic || 'breach');
+      const iconImg =
+        r.mechanic === 'vaal'
+          ? currencyCanvasCache.get('vaal_orb')
+          : mechanicIconCache.get(r.mechanic || 'breach');
       const iconReady =
         iconImg &&
         (iconImg instanceof HTMLCanvasElement
@@ -1821,6 +2717,76 @@
       ctx.font = '700 11px Cinzel, serif';
       ctx.textAlign = 'center';
       ctx.fillText(isAbyss ? 'ABYSS' : 'BREACH', hand.x, hand.y + hand.radius + 14);
+      ctx.restore();
+    }
+
+    // 4b. Rare Vaal Altar (50/50 Gamble) using official PoE2DB Vaal Orb icon
+    if (state.vaalAltar) {
+      const altar = state.vaalAltar;
+      const pulse = 0.9 + 0.14 * Math.sin(now * 0.009);
+      const remRatio = Math.max(0, 1 - altar.ageMs / altar.durationMs);
+      ctx.save();
+
+      // Pulsing blood-crimson ritual glow
+      const vg = ctx.createRadialGradient(
+        altar.x,
+        altar.y,
+        4,
+        altar.x,
+        altar.y,
+        altar.radius * 2.15 * pulse
+      );
+      vg.addColorStop(0, 'rgba(255, 110, 96, 0.92)');
+      vg.addColorStop(0.42, 'rgba(206, 26, 36, 0.56)');
+      vg.addColorStop(0.75, 'rgba(116, 12, 24, 0.24)');
+      vg.addColorStop(1, 'rgba(60, 6, 12, 0)');
+      ctx.fillStyle = vg;
+      ctx.beginPath();
+      ctx.arc(altar.x, altar.y, altar.radius * 2.15 * pulse, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rotating crimson-gold dashed ritual ring
+      ctx.save();
+      ctx.translate(altar.x, altar.y);
+      ctx.rotate(now * 0.0014);
+      ctx.strokeStyle = 'rgba(255, 168, 132, 0.78)';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.arc(0, 0, altar.radius * 1.18, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Lifetime countdown arc around altar rim
+      ctx.strokeStyle = 'rgba(255, 220, 146, 0.9)';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(
+        altar.x,
+        altar.y,
+        altar.radius * 1.02,
+        -Math.PI / 2,
+        -Math.PI / 2 + Math.PI * 2 * remRatio
+      );
+      ctx.stroke();
+
+      // Official PoE2DB Vaal Orb artwork centered inside the ritual ring
+      const vaalCanvas = currencyCanvasCache.get('vaal_orb');
+      if (vaalCanvas && vaalCanvas.width > 0) {
+        const size = altar.radius * 1.85;
+        ctx.drawImage(vaalCanvas, altar.x - size / 2, altar.y - size / 2, size, size);
+      }
+
+      // Crisp dark-backed nameplate
+      ctx.font = '800 11.5px Cinzel, serif';
+      ctx.textAlign = 'center';
+      ctx.lineWidth = 3.2;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.94)';
+      const altarText = 'VAAL ALTAR (50/50)';
+      ctx.strokeText(altarText, altar.x, altar.y + altar.radius + 16);
+      ctx.fillStyle = '#ffd8cc';
+      ctx.fillText(altarText, altar.x, altar.y + altar.radius + 16);
+
       ctx.restore();
     }
 
@@ -2014,6 +2980,10 @@
   // 11. KEYBOARD SHORTCUTS & UI EVENT LISTENERS
   // ---------------------------------------------------------------------------
   window.addEventListener('keydown', (ev) => {
+    const modalOpen =
+      (summaryModal && !summaryModal.classList.contains('hidden')) ||
+      (helpModal && !helpModal.classList.contains('hidden'));
+
     if (ev.key === 'z' || ev.key === 'Z') {
       toggleLabelsHidden();
     } else if (ev.key === 'm' || ev.key === 'M') {
@@ -2021,6 +2991,10 @@
     } else if (ev.key === 'Escape') {
       summaryModal.classList.add('hidden');
       if (helpModal) helpModal.classList.add('hidden');
+    } else if (!modalOpen && (ev.key === '1' || ev.key === 'q' || ev.key === 'Q')) {
+      activateChargedMechanic('breach');
+    } else if (!modalOpen && (ev.key === '2' || ev.key === 'e' || ev.key === 'E')) {
+      activateChargedMechanic('abyss');
     } else if (ev.code === 'Space' && document.activeElement === document.body) {
       ev.preventDefault();
       if (!state.running) {
@@ -2030,6 +3004,23 @@
       }
     }
   });
+
+  if (dockBreachLabel) {
+    dockBreachLabel.addEventListener('click', () => activateChargedMechanic('breach'));
+  }
+  if (dockAbyssLabel) {
+    dockAbyssLabel.addEventListener('click', () => activateChargedMechanic('abyss'));
+  }
+
+  if (btnFilterAll) {
+    btnFilterAll.addEventListener('click', () => setBreakdownFilter('all'));
+  }
+  if (btnFilterCollected) {
+    btnFilterCollected.addEventListener('click', () => setBreakdownFilter('collected'));
+  }
+  if (btnFilterMissed) {
+    btnFilterMissed.addEventListener('click', () => setBreakdownFilter('missed'));
+  }
 
   if (tabTimed) {
     tabTimed.addEventListener('click', () => setMapMode('timed'));
@@ -3847,27 +4838,153 @@
       const imgData = sheet.ctx.getImageData(0, 0, sheet.width, sheet.height);
       const bands = findBandsY(imgData, sheet.height, isFgBlack, 24, 12);
 
-      // Row 0: 4 sculpted gothic heraldic heater shields
+      // Row 0: 4 sculpted gothic heraldic heater shields -> re-toned per-pixel into 8 distinct tier shields
       if (bands.length >= 1) {
         const shields = findIslandsX(imgData, bands[0].y0, bands[0].y1, isFgBlack, 80, 12);
-        const shieldUrls = shields.map((box) => {
+        const baseShieldCanvases = shields.map((box) => {
           const c = cropCanvasRegion(sheet.canvas, box);
           clearBlackBackgroundBFS(c, {
             threshold: 10,
             featherHaloThreshold: 22,
             unpremultiply: true
           });
-          return trimCanvasByAlpha(c, 12).toDataURL('image/png');
+          return trimCanvasByAlpha(c, 12);
         });
-        if (shieldUrls.length >= 4) {
-          modalAssets.tierBadges.set('S++', shieldUrls[0]);
-          modalAssets.tierBadges.set('S+', shieldUrls[0]);
-          modalAssets.tierBadges.set('S', shieldUrls[1]);
-          modalAssets.tierBadges.set('A+', shieldUrls[1]);
-          modalAssets.tierBadges.set('A', shieldUrls[2]);
-          modalAssets.tierBadges.set('B', shieldUrls[2]);
-          modalAssets.tierBadges.set('D', shieldUrls[3]);
-          modalAssets.tierBadges.set('F', shieldUrls[3]);
+
+        const buildTintedShieldDataUrl = (srcCanvas, mode) => {
+          const sw = srcCanvas.width;
+          const sh = srcCanvas.height;
+          const out = document.createElement('canvas');
+          out.width = sw;
+          out.height = sh;
+          const octx = out.getContext('2d', { willReadFrequently: true });
+          octx.drawImage(srcCanvas, 0, 0);
+
+          if (mode === 'imperial-ruby' || mode === 'blood-garnet') {
+            return out.toDataURL('image/png');
+          }
+
+          const img = octx.getImageData(0, 0, sw, sh);
+          const d = img.data;
+          const clampByte = (v) => (v < 0 ? 0 : v > 255 ? 255 : Math.round(v));
+
+          for (let y = 0; y < sh; y++) {
+            const ny = (y / Math.max(1, sh - 1)) * 2 - 1;
+            for (let x = 0; x < sw; x++) {
+              const off = (y * sw + x) * 4;
+              if (d[off + 3] < 8) continue;
+              const r = d[off];
+              const g = d[off + 1];
+              const b = d[off + 2];
+              const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+              const nx = (x / Math.max(1, sw - 1)) * 2 - 1;
+              const radialDist = Math.hypot(nx * 1.12, (ny - 0.02) * 1.05);
+
+              if (mode === 'pearl-mirror') {
+                // S++ (Mirror of Kalandra): glossy celestial pearl-white enamel + brighter sovereign gold filigree
+                const isRubyEnamel = r > g + 22 && r > b + 14 && radialDist < 0.72;
+                if (isRubyEnamel) {
+                  // Remap deep ruby luminance into luminous pearl-ivory with warm alabaster-rose speculars
+                  const t = Math.min(1, Math.pow(lum / 138, 0.78));
+                  d[off] = clampByte(152 + t * 103);
+                  d[off + 1] = clampByte(142 + t * 108);
+                  d[off + 2] = clampByte(138 + t * 106);
+                } else {
+                  // Brighten & warm the ornate gold crown filigree
+                  d[off] = clampByte(r * 1.14 + 8);
+                  d[off + 1] = clampByte(g * 1.1 + 4);
+                  d[off + 2] = clampByte(b * 0.96);
+                }
+              } else if (mode === 'arcane-amethyst') {
+                // A+: deep royal PoE 2 amethyst-violet enamel + burnished silver-platinum scrollwork
+                const isCrimsonEnamel = r > g + 14 && r > b + 14 && radialDist < 0.72;
+                if (isCrimsonEnamel) {
+                  const t = Math.min(1, lum / 112);
+                  const spec = Math.max(0, (lum - 80) / 110);
+                  d[off] = clampByte(42 + t * 124 + spec * 78);
+                  d[off + 1] = clampByte(12 + t * 44 + spec * 56);
+                  d[off + 2] = clampByte(68 + t * 148 + spec * 40);
+                } else {
+                  // Cool burnished silver-platinum rim so A+ never reads as S's gold-crimson
+                  const coolLum = lum * 1.04;
+                  d[off] = clampByte(coolLum * 0.97 + r * 0.05);
+                  d[off + 1] = clampByte(coolLum * 0.98 + g * 0.04);
+                  d[off + 2] = clampByte(coolLum * 1.08 + b * 0.06);
+                }
+              } else if (mode === 'molten-copper') {
+                // A: richer fiery molten copper-orange enamel & warm hammered bronze
+                const isInnerPlate = radialDist < 0.68 && r > b + 16;
+                if (isInnerPlate) {
+                  d[off] = clampByte(r * 1.14 + 10);
+                  d[off + 1] = clampByte(g * 0.92 + 2);
+                  d[off + 2] = clampByte(b * 0.68);
+                } else {
+                  d[off] = clampByte(r * 1.04);
+                  d[off + 1] = clampByte(g * 0.96);
+                  d[off + 2] = clampByte(b * 0.9);
+                }
+              } else if (mode === 'viridian-jade') {
+                // B: weathered Wraeclast viridian-emerald enamel + aged antique brass rim
+                const isInnerPlate = radialDist < 0.67 && r > b + 18 && g > b + 6;
+                if (isInnerPlate) {
+                  const t = Math.min(1, lum / 155);
+                  const spec = Math.max(0, (lum - 115) / 110);
+                  d[off] = clampByte(14 + t * 46 + spec * 68);
+                  d[off + 1] = clampByte(44 + t * 126 + spec * 72);
+                  d[off + 2] = clampByte(34 + t * 94 + spec * 62);
+                } else {
+                  // Cool verdigris-patina antique brass rim
+                  d[off] = clampByte(r * 0.86);
+                  d[off + 1] = clampByte(g * 0.98 + 4);
+                  d[off + 2] = clampByte(b * 0.96 + 6);
+                }
+              } else if (mode === 'cobalt-steel') {
+                // D: cold tempered cobalt-slate forged steel (clearly brighter & cooler than F)
+                const isInnerPlate = radialDist < 0.7;
+                if (isInnerPlate) {
+                  d[off] = clampByte(lum * 0.72 + 12);
+                  d[off + 1] = clampByte(lum * 0.96 + 22);
+                  d[off + 2] = clampByte(lum * 1.28 + 34);
+                } else {
+                  d[off] = clampByte(r * 0.92 + 6);
+                  d[off + 1] = clampByte(g * 1.02 + 10);
+                  d[off + 2] = clampByte(b * 1.18 + 16);
+                }
+              } else if (mode === 'ashen-iron') {
+                // F: dark rusted ashen-charcoal iron (distinctly darker & desaturated vs D)
+                const ash = lum * 0.62;
+                d[off] = clampByte(ash * 1.03);
+                d[off + 1] = clampByte(ash * 0.97);
+                d[off + 2] = clampByte(ash * 0.95);
+              }
+            }
+          }
+
+          octx.putImageData(img, 0, 0);
+          return out.toDataURL('image/png');
+        };
+
+        if (baseShieldCanvases.length >= 4) {
+          const fbSpec = window.FilterBladeSpec;
+          const allTiers = ['S++', 'S+', 'S', 'A+', 'A', 'B', 'D', 'F'];
+          const fallbackSpecs = {
+            'S++': { baseShieldIndex: 0, mode: 'pearl-mirror' },
+            'S+': { baseShieldIndex: 0, mode: 'imperial-ruby' },
+            S: { baseShieldIndex: 1, mode: 'blood-garnet' },
+            'A+': { baseShieldIndex: 1, mode: 'arcane-amethyst' },
+            A: { baseShieldIndex: 2, mode: 'molten-copper' },
+            B: { baseShieldIndex: 2, mode: 'viridian-jade' },
+            D: { baseShieldIndex: 3, mode: 'cobalt-steel' },
+            F: { baseShieldIndex: 3, mode: 'ashen-iron' }
+          };
+          allTiers.forEach((tier) => {
+            const theme =
+              fbSpec && typeof fbSpec.getTierBadgeTheme === 'function'
+                ? fbSpec.getTierBadgeTheme(tier)
+                : fallbackSpecs[tier];
+            const baseIdx = Math.max(0, Math.min(baseShieldCanvases.length - 1, theme.baseShieldIndex));
+            modalAssets.tierBadges.set(tier, buildTintedShieldDataUrl(baseShieldCanvases[baseIdx], theme.mode));
+          });
         }
       }
 
@@ -4408,6 +5525,11 @@
     handleAstrolabeClick,
     spawnMonsterBurst,
     spawnCurrencyItem,
+    activateChargedMechanic,
+    updateMechanicDockUI,
+    spawnVaalAltar,
+    handleVaalAltarClick,
+    setBreakdownFilter,
     toggleLabelsHidden,
     openSummaryModal,
     CURRENCY_TABLE,
@@ -4426,6 +5548,7 @@
   resizeCanvas();
   initFogWisps();
   syncMuteUI();
+  updateMechanicDockUI();
   updateHUD();
   requestAnimationFrame(frameLoop);
 })();
