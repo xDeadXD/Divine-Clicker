@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css?v=35" />
+  <link rel="stylesheet" href="./style.css?v=36" />
 </head>
 <body class="assets-loading">
   <div id="app-container">
@@ -187,14 +187,20 @@
             </div>
 
             <div class="modal-filter-tabs" role="tablist" aria-label="Filter Currency Breakdown">
-              <button id="btn-filter-all" class="modal-filter-tab active" type="button" role="tab" aria-selected="true" data-filter="all">
-                All <span class="filter-count" id="filter-count-all">21</span>
+              <button id="btn-filter-all" class="modal-filter-tab modal-filter-tab-all active" type="button" role="tab" aria-selected="true" data-filter="all">
+                <img class="ui-slice modal-filter-tab-img modal-filter-tab-img-idle" alt="" aria-hidden="true" />
+                <img class="ui-slice modal-filter-tab-img modal-filter-tab-img-active" alt="" aria-hidden="true" />
+                <span class="modal-filter-tab-label">All <span class="filter-count" id="filter-count-all">21</span></span>
               </button>
-              <button id="btn-filter-collected" class="modal-filter-tab" type="button" role="tab" aria-selected="false" data-filter="collected">
-                Collected <span class="filter-count" id="filter-count-collected">0</span>
+              <button id="btn-filter-collected" class="modal-filter-tab modal-filter-tab-collected" type="button" role="tab" aria-selected="false" data-filter="collected">
+                <img class="ui-slice modal-filter-tab-img modal-filter-tab-img-idle" alt="" aria-hidden="true" />
+                <img class="ui-slice modal-filter-tab-img modal-filter-tab-img-active" alt="" aria-hidden="true" />
+                <span class="modal-filter-tab-label">Collected <span class="filter-count" id="filter-count-collected">0</span></span>
               </button>
-              <button id="btn-filter-missed" class="modal-filter-tab" type="button" role="tab" aria-selected="false" data-filter="missed">
-                Missed <span class="filter-count" id="filter-count-missed">0</span>
+              <button id="btn-filter-missed" class="modal-filter-tab modal-filter-tab-missed" type="button" role="tab" aria-selected="false" data-filter="missed">
+                <img class="ui-slice modal-filter-tab-img modal-filter-tab-img-idle" alt="" aria-hidden="true" />
+                <img class="ui-slice modal-filter-tab-img modal-filter-tab-img-active" alt="" aria-hidden="true" />
+                <span class="modal-filter-tab-label">Missed <span class="filter-count" id="filter-count-missed">0</span></span>
               </button>
             </div>
           </div>
@@ -312,7 +318,7 @@
     </div>
   </div>
 
-  <script src="./filterblade.js?v=35"></script>
-  <script src="./game.js?v=35"></script>
+  <script src="./filterblade.js?v=36"></script>
+  <script src="./game.js?v=36"></script>
 </body>
 </html>

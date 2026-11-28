@@ -4992,18 +4992,59 @@
       if (bands.length >= 2) {
         const btns = findIslandsX(imgData, bands[1].y0, bands[1].y1, isFgBlack, 60, 12);
         if (btns.length >= 3) {
-          const makeBtnUrl = (box) => {
+          const makeBtnCanvas = (box) => {
             const c = cropCanvasRegion(sheet.canvas, box);
             clearBlackBackgroundBFS(c, {
               threshold: 10,
               featherHaloThreshold: 20,
               unpremultiply: true
             });
-            return trimCanvasByAlpha(c, 12).toDataURL('image/png');
+            return trimCanvasByAlpha(c, 12);
           };
-          if (imgBtnReplay) imgBtnReplay.src = makeBtnUrl(btns[0]);
-          if (imgBtnDismiss) imgBtnDismiss.src = makeBtnUrl(btns[1]);
-          if (imgModalClose) imgModalClose.src = makeBtnUrl(btns[2]);
+
+          // Horizontal 3-slice composer keeping ornate corner filigree / bronze corner brackets 1:1 unstretched
+          const buildButton3SliceUrl = (srcCanvas, dstW, dstH) => {
+            const sw = srcCanvas.width;
+            const sh = srcCanvas.height;
+            const capSrcW = Math.min(Math.floor(sw * 0.24), Math.round(sh * 0.72));
+            const capDstW = Math.min(Math.floor(dstW * 0.32), Math.round(capSrcW * (dstH / sh)));
+            const midSrcW = Math.max(1, sw - capSrcW * 2);
+            const midDstW = Math.max(1, dstW - capDstW * 2);
+
+            const out = document.createElement('canvas');
+            out.width = dstW;
+            out.height = dstH;
+            const octx = out.getContext('2d');
+            octx.imageSmoothingEnabled = true;
+            octx.imageSmoothingQuality = 'high';
+            // Left cap, stretched smooth center, right cap
+            octx.drawImage(srcCanvas, 0, 0, capSrcW, sh, 0, 0, capDstW, dstH);
+            octx.drawImage(srcCanvas, capSrcW, 0, midSrcW, sh, capDstW, 0, midDstW, dstH);
+            octx.drawImage(srcCanvas, sw - capSrcW, 0, capSrcW, sh, dstW - capDstW, 0, capDstW, dstH);
+            return out.toDataURL('image/png');
+          };
+
+          const replayCanvas = makeBtnCanvas(btns[0]);
+          const dismissCanvas = makeBtnCanvas(btns[1]);
+          const closeCanvas = makeBtnCanvas(btns[2]);
+
+          if (imgBtnReplay) imgBtnReplay.src = replayCanvas.toDataURL('image/png');
+          if (imgBtnDismiss) imgBtnDismiss.src = dismissCanvas.toDataURL('image/png');
+          if (imgModalClose) imgModalClose.src = closeCanvas.toDataURL('image/png');
+
+          // Wire authentic PoE 2 sculpted metallic button sprites onto All / Collected / Missed filter tabs
+          const tabSpecs = [
+            { btn: btnFilterAll, w: 228, h: 68 },
+            { btn: btnFilterCollected, w: 286, h: 68 },
+            { btn: btnFilterMissed, w: 252, h: 68 }
+          ];
+          tabSpecs.forEach(({ btn, w, h }) => {
+            if (!btn) return;
+            const idleImg = btn.querySelector('.modal-filter-tab-img-idle');
+            const activeImg = btn.querySelector('.modal-filter-tab-img-active');
+            if (idleImg) idleImg.src = buildButton3SliceUrl(dismissCanvas, w, h);
+            if (activeImg) activeImg.src = buildButton3SliceUrl(replayCanvas, w, h);
+          });
         }
       }
     }
